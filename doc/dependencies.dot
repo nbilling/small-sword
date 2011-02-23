@@ -1,15 +1,16 @@
 digraph dependencies {
         smallsword [label="small-sword.cpp"]
+        tacticalui [label = "Tacticalui.cpp"]
         dungeongenerator [label="DungeonGenerator.cpp"]
         zone [label="Zone.cpp"]
         object [label="Object.cpp"]
         tile [label="Tile.cpp"]
         rect [label="Rect.cpp"]
 
-        smallsword -> dungeongenerator
+        smallsword -> tacticalui
+        tacticalui -> dungeongenerator
         dungeongenerator -> zone
         dungeongenerator -> rect
         zone -> object
         zone -> tile
-        { rank=same; rect object tile }
 }
