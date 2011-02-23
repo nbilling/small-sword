@@ -5,6 +5,8 @@
 //libtcod
 #include "libtcod.hpp"
 
+#include "CSheet.cpp"
+
 class Object {
 public:
   int x;
@@ -13,9 +15,10 @@ public:
   char* name;
   TCODColor color;
   bool blocks;
+  CSheet* csheet;
 
   Object (int new_x, int new_y, char new_c, const char* new_name, 
-          TCODColor new_color, bool new_blocks) {
+          TCODColor new_color, bool new_blocks, CSheet* new_csheet) {
     x = new_x;
     y = new_y;
     c = new_c;
@@ -23,6 +26,7 @@ public:
     strcpy (name, new_name);
     color = new_color;
     blocks = new_blocks;
+    csheet = new_csheet;
   }
 
   ~Object () {

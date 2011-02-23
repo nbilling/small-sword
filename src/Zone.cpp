@@ -76,9 +76,7 @@ public:
   }
  
   void move_object (Object* object, int dx, int dy){
-    if (!is_blocked (object->x + dx, object->y + dy)) {
       object->move (dx, dy);
-    }
   }
 
   void move_object_towards (Object* object, int target_x, int target_y){

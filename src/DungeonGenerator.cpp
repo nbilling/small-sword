@@ -6,7 +6,7 @@
 using namespace std;
 //My files
 #include "Rect.cpp"
-#include "Zone.cpp"
+#include "AI.cpp"
 
 //Definitions
 #define MAXINT(a,b) (a > b ? a : b)
@@ -48,7 +48,7 @@ void create_v_tunnel (Zone* zone, int y1, int y2, int x) {
   }
 }
 
-void place_objects (Zone* zone, const Rect* room) {
+void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
   TCODRandom* rng = TCODRandom::getInstance();
   //choose random number of monsters
   int num_monsters = rng->getInt(0, MAX_ROOM_MONSTERS);
@@ -64,19 +64,21 @@ void place_objects (Zone* zone, const Rect* room) {
       if (rng->getInt(0, 100) < 80) {  //80% chance of getting an orc
         //create an orc
         monster = new Object(x, y, 'o', "orc", TCODColor::desaturatedGreen,
-                                     true);
+                             true, new CSheet(10));
       }
       else {
         //create a troll
         monster = new Object(x, y, 'T', "troll", TCODColor::darkerGreen,
-                                     true);
+                             true, new CSheet(15));
       }
       zone->objects->push_back(monster);
+      AI* ai = new AI (monster);
+      ais->push_back(ai);
     }
   }
 }
 
-void make_grid (Zone* zone) {
+void make_grid (Zone* zone, list<AI*>* ais) {
   TCODRandom* rng = TCODRandom::getInstance();
   list<Rect*>* rooms = new list<Rect*>();    
   int num_rooms = 0;        
@@ -101,7 +103,7 @@ void make_grid (Zone* zone) {
       //No intersections so "paint" it to the grid's tiles
       create_room(zone, new_room); 
       //Add random contents to this room, such as monsters
-      place_objects(zone, new_room); 
+      place_objects(zone, ais, new_room); 
       int new_x = new_room->center_x();
       int new_y = new_room->center_y(); 
       if (num_rooms > 0) {

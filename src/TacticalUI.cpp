@@ -1,8 +1,7 @@
+#include "list"
+
 #include "DungeonGenerator.cpp"
 
-#define FOV_ALGO 0  
-#define FOV_LIGHT_WALLS true
-#define TORCH_RADIUS 10
 
 #define color_dark_wall TCODColor::darkGrey
 #define color_light_wall TCODColor::lightGrey
@@ -15,6 +14,7 @@
 class TacticalUI {
 public:
   Zone* zone;
+  list<AI*>* ais;
   Object* player;
   TCODMap* fov_map;
   TCODConsole* console;
@@ -25,9 +25,10 @@ public:
   int game_state;
   int player_action;
 
-  TacticalUI (Zone* new_zone, Object* new_player, TCODMap* new_fov_map, 
+  TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_fov_map, 
                      TCODConsole* new_console, int new_screen_w, int new_screen_h) {
     zone = new_zone;
+    ais = new_ais;
     player = new_player;
     fov_map = new_fov_map;
     console = new_console;
@@ -127,6 +128,8 @@ public:
     player_action = PA_NONE;
     
     while (!TCODConsole::isWindowClosed ()) {
+      Rulebook* rulebook = new Rulebook(zone);
+
       if (fov_recompute) {
         fov_recompute = false;
         fov_map->computeFov (player->x, player->y, TORCH_RADIUS, FOV_LIGHT_WALLS); 
@@ -140,9 +143,12 @@ public:
       if (handle_keys () == -1) {    
         break;
       }
+
+      for (list<AI*>::iterator ai = ais->begin();
+           ai != ais->end(); ai++){
+        (*ai)->take_turn(rulebook);
+      }    
     }
     return (0);
   }
-
-
 };

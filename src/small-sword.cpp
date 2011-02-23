@@ -1,5 +1,6 @@
 //Standard library
 #include "iostream"
+#include "list"
 using namespace std;
 
 //libtcod
@@ -43,11 +44,14 @@ int main (int argc, const char** argv) {
   cerr << "+ Create zone" << endl;
   Zone* zone = new Zone (GRID_WIDTH, GRID_HEIGHT);
 
+  cerr << "+ Create AI list" << endl;
+  list<AI*>* ais = new list<AI*>();
+
   cerr << "+ Generate dungeon" << endl;
-  make_grid (zone);
+  make_grid (zone, ais);
   
   cerr << "+ Create player" << endl;
-  Object* player = new Object (0, 0, '@', "player", TCODColor::white, true);
+  Object* player = new Object (0, 0, '@', "player", TCODColor::white, true, new CSheet(20));
 
   cerr << "+ Place player" << endl;
   find_empty_tile (zone, player);
@@ -59,7 +63,7 @@ int main (int argc, const char** argv) {
       fov_map->setProperties (x, y, !zone->grid[x][y]->blocked, !zone->grid[x][y]->block_sight);
     }
 
-  TacticalUI* tactical = new TacticalUI (zone, player, fov_map, con, 
+  TacticalUI* tactical = new TacticalUI (zone, ais, player, fov_map, con, 
                                          SCREEN_WIDTH, SCREEN_HEIGHT);
   tactical->display ();
 
