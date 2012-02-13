@@ -1,21 +1,6 @@
-//Standard library
-#include "list"
+#include "DungeonGenerator.hpp"
 
-//libtcod
-#include "libtcod.hpp"
 using namespace std;
-//My files
-#include "Rect.cpp"
-#include "AI.cpp"
-
-//Definitions
-#define MAXINT(a,b) (a > b ? a : b)
-#define MININT(a,b) (a < b ? a : b)
-
-#define ROOM_MAX_SIZE 10
-#define ROOM_MIN_SIZE 6
-#define MAX_ROOMS 30
-#define MAX_ROOM_MONSTERS 3
 
 inline
 void create_room (Zone* zone, const Rect* room) {
@@ -59,16 +44,16 @@ void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
     int y = rng->getInt(room->y1, room->y2);
  
     //only place it if the tile is not blocked
-    if (!zone->is_blocked(x, y)) {
+    if (!zone->is_blocked ((Coord) {x, y})) {
       Object* monster;
       if (rng->getInt(0, 100) < 80) {  //80% chance of getting an orc
         //create an orc
-        monster = new Object(x, y, 'o', "orc", TCODColor::desaturatedGreen,
+        monster = new Object(zone, (Coord){x, y}, 'o', "orc", TCODColor::desaturatedGreen,
                              true, new CSheet(10));
       }
       else {
         //create a troll
-        monster = new Object(x, y, 'T', "troll", TCODColor::darkerGreen,
+        monster = new Object(zone, (Coord){x, y}, 'T', "troll", TCODColor::darkerGreen,
                              true, new CSheet(15));
       }
       zone->objects->push_back(monster);
