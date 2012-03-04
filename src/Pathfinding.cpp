@@ -120,19 +120,65 @@ inline void consider_edges (const Coord& src, Zone* zone, int** d, Coord** p, Mi
     }
 }
 
-int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
+PathMap dijkstra (const Coord& src, Zone* zone) {
+  // Dijkstra's algorithm for pathfinding in small-sword
 
-  int src_x = src.x;
-  int src_y = src.y;
-  int dest_x = dest.x;
-  int dest_y = dest.y;
+  // Initialise weight heap
+  MinHeap<Node>* u = new MinHeap<Node> (zone->grid_w * zone->grid_h);
+  for (int i=0; i < zone->grid_w; i ++)
+    for (int j=0; j < zone->grid_h; j++)
+      u->push (* new Node ((Coord){i,j}, INF));
+  
+  // Initialise dist array
+  int** d = new int*[zone->grid_w];
+  for (int i=0; i < zone->grid_w; i ++){
+    d[i] = new int[zone->grid_h];
+    for (int j=0; j < zone->grid_h; j++)
+      d[i][j] = INF;
+  }
+
+  // Initialise prev array
+  Coord** p = new Coord*[zone->grid_w];
+  for (int i=0; i < zone->grid_w; i++)
+    p[i] = new Coord[zone->grid_h];
+               
+  // Set current xy
+  Coord cur = src;
+
+  // Set current xy tentative dist to 0
+  u->decrease_key (hash_coords (cur), 0);
+  d[cur.x][cur.y] = 0;
+
+  // While current xy != target
+  while (!u->is_empty ()) {
+    // Consider current node's edges
+    consider_edges (cur, zone, d, p, u);
+
+    // Pick least node from heap and remove it
+    Node cur_n = u->pop();
+
+    // Set current xy to node's xy
+    cur = cur_n.c;
+  }
+
+  delete u;
+
+  return ((PathMap){d,p});
+}
+
+list<Coord>* pathfind_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
+  
+  list<Coord>* retval = new list<Coord> ();
 
   //If destination is blocked then will always say to stand still
   //Don't call this function on a tile that could be blocked
   //If the destination is unblocked but unreachable then this function WILL 
   //attempt to pop an empty heap.
-  if (zone->is_blocked ((Coord){dest_x, dest_y}))
-    return 5;
+  if (zone->is_blocked (dest)) {
+    cerr << "Pathfinding => pathfind_dijkstra => "
+      "dest is blocked" << endl;
+    return retval;
+  }
 
   // Dijkstra's algorithm for pathfinding in small-sword
 
@@ -156,24 +202,23 @@ int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
     p[i] = new Coord[zone->grid_h];
                
   // Set current xy
-  int cur_x = src_x;
-  int cur_y = src_y;
+  Coord cur = src;
 
   // Set current xy tentative dist to 0
-  u->decrease_key (hash_coords ((Coord) {cur_x, cur_y}), 0);
-  d[cur_x][cur_y] = 0;
+  u->decrease_key (hash_coords (cur), 0);
+  d[cur.x][cur.y] = 0;
 
   // While current xy != target
-  while (!(cur_x == dest_x && cur_y == dest_y)) {
+  while (!coord_eq (cur, dest)) {
     if (u->is_empty()) {
-      cerr << "Pathfinding => pathfind_step_dijkstra =>"
+      cerr << "Pathfinding => pathfind_dijkstra =>"
         "Heap empty before path found."
            << endl;
-      return 5;
+      return retval;
     }
          
     // Consider current node's edges
-    consider_edges ((Coord){cur_x, cur_y}, zone, d, p, u);
+    consider_edges (cur, zone, d, p, u);
 
     // Pick least node from heap and remove it
     Node cur_n = u->pop();
@@ -181,26 +226,26 @@ int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
     // If distance to cur_n is infinite then there's
     // no path to dest.
     if (cur_n.dist == INF) {
-      cerr << "Pathfinding => pathfind_step_dijkstra =>"
+      cerr << "Pathfinding => pathfind_dijkstra =>"
         "Sought node unreachable." << endl;
-      return 5;
+      return retval;
     }
 
     // Set current xy to node's xy
-    cur_x = cur_n.c.x;
-    cur_y = cur_n.c.y;
+    cur = cur_n.c;
   }
 
-  while (!(p[cur_x][cur_y].x == src_x && p[cur_x][cur_y].y == src_y)) {
-    if (p[cur_x][cur_y].x == cur_x && p[cur_x][cur_y].y == cur_y) {
-      cerr << "Pathfinding => pathfind_step_dijkstra =>" 
+  while (!coord_eq (cur, src)) {
+    if (coord_eq (p[cur.x][cur.y], cur)) {
+      cerr << "Pathfinding => pathfind_dijkstra =>" 
         "Very weird infinite loop encountered" << endl;
-      return 5;
+      return retval;
     }
-    int temp = cur_x;
-    cur_x = p[cur_x][cur_y].x;
-    cur_y = p[temp][cur_y].y;
+    retval->push_front (cur);
+    cur = p[cur.x][cur.y];
   }
+  retval->push_front (cur);
+  
 
   delete u;
   for (int i=0; i < zone->grid_w; i ++)
@@ -210,6 +255,23 @@ int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
     delete p[i];
   delete p;
 
-  cout << displacement_to_direction (cur_x - src_x, cur_y - src_y) << endl;
-  return (displacement_to_direction (cur_x - src_x, cur_y - src_y));
+  return (retval);
 }
+
+int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
+  list<Coord>* path = pathfind_dijkstra (src, dest, zone);
+  if (path->size () > 1) {
+    Coord step_start = path->front ();
+    path->pop_front ();
+    Coord step_end = path->front ();
+    path->pop_front ();
+    if (!coord_eq (step_start, src)) {
+      cerr << "Pathfinding => pathfind_step_dijkstra =>"
+        "path does not begin at src" << endl;
+      return (5);
+    }
+    return (displacement_to_direction (step_end.x - step_start.x, step_end.y - step_start.y));
+  }
+  else return (5);
+}
+
