@@ -47,8 +47,8 @@ inline int hash (const Node& n) {
 }
 
 inline Node& set_key (Node& n, int new_dist) {
-  n.dist = new_dist;
-  return n;
+  n.dist = new_dist; 
+ return n;
 }
 
 inline int hash_coords (Coord c) {
@@ -149,8 +149,8 @@ PathMap dijkstra (const Coord& src, Zone* zone) {
   u->decrease_key (hash_coords (cur), 0);
   d[cur.x][cur.y] = 0;
 
-  // While current xy != target
-  while (!u->is_empty ()) {
+  // While there are more reachable, unvisited nodes left
+  while (!u->is_empty () && d[cur.x][cur.y] != INF) {
     // Consider current node's edges
     consider_edges (cur, zone, d, p, u);
 
@@ -180,61 +180,18 @@ list<Coord>* pathfind_dijkstra (const Coord& src, const Coord& dest, Zone* zone)
     return retval;
   }
 
-  // Dijkstra's algorithm for pathfinding in small-sword
+  PathMap path_map = dijkstra (src, zone);
 
-  // Initialise weight heap
-  MinHeap<Node>* u = new MinHeap<Node> (zone->grid_w * zone->grid_h);
-  for (int i=0; i < zone->grid_w; i ++)
-    for (int j=0; j < zone->grid_h; j++)
-      u->push (* new Node ((Coord){i,j}, INF));
-  
-  // Initialise dist array
-  int** d = new int*[zone->grid_w];
-  for (int i=0; i < zone->grid_w; i ++){
-    d[i] = new int[zone->grid_h];
-    for (int j=0; j < zone->grid_h; j++)
-      d[i][j] = INF;
+  int** d = path_map.d;
+  Coord** p = path_map.p;
+
+  if (d[dest.x][dest.y] == INF) {
+    cerr << "Pathfinding => pathfind_dijkstra =>"
+      "Sought node unreachable." << endl;
+    return retval;
   }
 
-  // Initialise prev array
-  Coord** p = new Coord*[zone->grid_w];
-  for (int i=0; i < zone->grid_w; i++)
-    p[i] = new Coord[zone->grid_h];
-               
-  // Set current xy
-  Coord cur = src;
-
-  // Set current xy tentative dist to 0
-  u->decrease_key (hash_coords (cur), 0);
-  d[cur.x][cur.y] = 0;
-
-  // While current xy != target
-  while (!coord_eq (cur, dest)) {
-    if (u->is_empty()) {
-      cerr << "Pathfinding => pathfind_dijkstra =>"
-        "Heap empty before path found."
-           << endl;
-      return retval;
-    }
-         
-    // Consider current node's edges
-    consider_edges (cur, zone, d, p, u);
-
-    // Pick least node from heap and remove it
-    Node cur_n = u->pop();
-
-    // If distance to cur_n is infinite then there's
-    // no path to dest.
-    if (cur_n.dist == INF) {
-      cerr << "Pathfinding => pathfind_dijkstra =>"
-        "Sought node unreachable." << endl;
-      return retval;
-    }
-
-    // Set current xy to node's xy
-    cur = cur_n.c;
-  }
-
+  Coord cur = dest;
   while (!coord_eq (cur, src)) {
     if (coord_eq (p[cur.x][cur.y], cur)) {
       cerr << "Pathfinding => pathfind_dijkstra =>" 
@@ -246,8 +203,6 @@ list<Coord>* pathfind_dijkstra (const Coord& src, const Coord& dest, Zone* zone)
   }
   retval->push_front (cur);
   
-
-  delete u;
   for (int i=0; i < zone->grid_w; i ++)
     delete d[i];
   delete d;
