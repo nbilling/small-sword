@@ -166,53 +166,51 @@ PathMap dijkstra (const Coord& src, Zone* zone) {
   return ((PathMap){d,p});
 }
 
-list<Coord>* pathfind_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
-  
+list<Coord>* find_path (const Coord& src, const Coord& dest, const PathMap& path_map) {
   list<Coord>* retval = new list<Coord> ();
-
-  //If destination is blocked then will always say to stand still
-  //Don't call this function on a tile that could be blocked
-  //If the destination is unblocked but unreachable then this function WILL 
-  //attempt to pop an empty heap.
-  if (zone->is_blocked (dest)) {
-    cerr << "Pathfinding => pathfind_dijkstra => "
-      "dest is blocked" << endl;
-    return retval;
-  }
-
-  PathMap path_map = dijkstra (src, zone);
 
   int** d = path_map.d;
   Coord** p = path_map.p;
 
   if (d[dest.x][dest.y] == INF) {
-    cerr << "Pathfinding => pathfind_dijkstra =>"
-      "Sought node unreachable." << endl;
+    // Sought node unreachable
     return retval;
   }
 
   Coord cur = dest;
   while (!coord_eq (cur, src)) {
-    if (coord_eq (p[cur.x][cur.y], cur)) {
-      cerr << "Pathfinding => pathfind_dijkstra =>" 
-        "Very weird infinite loop encountered" << endl;
-      return retval;
-    }
+    // if (coord_eq (p[cur.x][cur.y], cur)) {
+    //   cerr << "Pathfinding => find_path =>" 
+    //     "Very weird infinite loop encountered" << endl;
+    //   return retval;
+    // }
     retval->push_front (cur);
     cur = p[cur.x][cur.y];
   }
   retval->push_front (cur);
   
+  return (retval);
+}
+
+// Find the shortest path from src to dest and return it.
+list<Coord>* pathfind_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
+
+  PathMap path_map = dijkstra (src, zone);
+
+  list<Coord>* retval = find_path (src, dest, path_map);
+  
   for (int i=0; i < zone->grid_w; i ++)
-    delete d[i];
-  delete d;
+    delete path_map.d[i];
+  delete path_map.d;
   for (int i=0; i < zone->grid_w; i++)
-    delete p[i];
-  delete p;
+    delete path_map.p[i];
+  delete path_map.p;
 
   return (retval);
 }
 
+// Find the shortest path from src to dest, then return the first step
+// of the path.
 int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
   list<Coord>* path = pathfind_dijkstra (src, dest, zone);
   if (path->size () > 1) {
@@ -220,11 +218,14 @@ int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone) {
     path->pop_front ();
     Coord step_end = path->front ();
     path->pop_front ();
-    if (!coord_eq (step_start, src)) {
-      cerr << "Pathfinding => pathfind_step_dijkstra =>"
-        "path does not begin at src" << endl;
-      return (5);
-    }
+    delete (path);
+
+    // if (!coord_eq (step_start, src)) {
+    //   cerr << "Pathfinding => pathfind_step_dijkstra =>"
+    //     "path does not begin at src" << endl;
+    //   return (5);
+    // }
+
     return (displacement_to_direction (step_end.x - step_start.x, step_end.y - step_start.y));
   }
   else return (5);

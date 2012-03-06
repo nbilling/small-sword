@@ -1,6 +1,8 @@
 #include "AI.hpp"
 #include "iostream"
 
+#define INF INT_MAX
+
 AI::AI (Object* new_object) {
   object = new_object;
   in_pursuit = false;
@@ -27,149 +29,137 @@ list<Object*>* AI::visible_objects () {
   return (visible);
 }
 
-void AI::move_towards (const Coord& target){
-  float dx = (float) (target.x - object->loc.x);
-  float dy = (float) (target.y - object->loc.y);
-  float distance = sqrt (pow (dx, 2) + pow(dy, 2));
-  
-  //normalize it to length 1 (preserving direction), then round it and
-  //convert to integer so the movement is restricted to the grid
-  Coord move = (Coord) {round (dx / distance), round (dy / distance)};
-  walk (object, move.x, move.y);
-}
-
 void AI::move_towards_smarter (const Coord& target){
   int dir = pathfind_step_dijkstra (object->loc, target, object->zone);
   walk (object, dir);
 }
 
-Coord AI::nearest_view_to_target (const Coord& loc) {
-  // This function returns the nearest coordinate from
-  // which you can see loc, since I'm pretty sure sight
-  // is symmetric, we decide if you can see loc by checking
-  // if someone at loc could see you.
-
-  // If there is no such coordinate then return (-1,-1).
-  int dist = 0;
-  Coord cur = loc; 
-  fov_map->computeFov (loc.x, loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
-
-  while (dist < TORCH_RADIUS) {
-    for (int i=1; i <= 2*dist + 1 ; i++) {
-      cur.x += 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y)))
-          return cur;
-    }
-    for (int i=1; i <= 2*dist + 1; i++) {
-      cur.y += 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y)))
-          return cur;
-    }
-    for (int i=1; i <= 2*dist + 2; i++) {
-      cur.x -= 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y)))
-          return cur;
-    }
-    for (int i=1; i <= 2*dist + 2; i++) {
-      cur.y -= 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y)))
-          return cur;
-    }
-  }
-  return ((Coord){-1,-1});
+// Return true if each Coord in path is visible from at least one of fov1/fov2
+inline bool AI::path_in_fov (list<Coord>* path, const TCODMap* fov1, const TCODMap* fov2) {
+  bool in_fov = true;
+  for (list<Coord>::iterator c = path->begin (); c != path->end (); c++)
+    in_fov = in_fov && (fov1->isInFov ((*c).x, (*c).y) || fov2->isInFov ((*c).x, (*c).y));
+  return (in_fov);
 }
 
-Coord AI::nearest_view_to_target_from_src (const Coord& loc, const Coord& src) {
-  // Varies from nearest_view_to_target_from_src in that
-  // it looks for the coordinate closest to some src.
+// Find closest feasible destination to target, if you start at src
+Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, Zone* zone) {
+  // 
+  // 
+  PathMap path_map = dijkstra (src, zone);
+
+  TCODMap* target_fov_map = new TCODMap (80,45);
+  target_fov_map->copy (fov_map);
+  target_fov_map->computeFov (target.x, target.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
+  fov_map->computeFov (object->loc.x, object->loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
+  
+
   int ring = 0;
-  int best_to_src = 10000; //Should be max int, but blah
-  int best_to_loc = 10000; //Should be max int, but blah
-  Coord cur = loc;
+  Coord cur = target;
   Coord best = (Coord){-1,-1};
-  fov_map->computeFov (loc.x, loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
+  int best_to_src = INF;
+  int best_to_target = INF;
+
+  // Process center of spiral first
+  if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
+    list<Coord>* cur_path = find_path (src, cur, path_map);
+      if (path_in_fov (cur_path, fov_map, target_fov_map)) {
+        int cur_to_src = path_map.d[cur.x][cur.y];
+        int cur_to_target = distance_to (cur, target);
+        if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+          best_to_src = cur_to_src;
+          best_to_target = cur_to_target;
+          best = cur;
+        }
+      }
+      delete (cur_path);
+  }
 
 
-  // Move outwards in a spiral from loc (iterating through rings)
-  while (ring < TORCH_RADIUS && best_to_src == 10000) {
+  // Move outwards in a spiral from target (iterating through rings)
+  while (ring < TORCH_RADIUS) {
 
     // Rightwards segment of spiral ring
     for (int i=1; i <= 2*ring + 1 ; i++) {
       cur.x += 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y))) {
-          int cur_to_src = distance_to (cur, src);
-          int cur_to_loc = distance_to (cur, loc);
-          if (cur_to_loc < best_to_loc 
-              || cur_to_loc == best_to_loc && cur_to_src < best_to_src) {
-            best_to_loc = distance_to (cur, loc);
-            best_to_src = distance_to (cur, src);
+      if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
+        list<Coord>* cur_path = find_path (src, cur, path_map);
+        if (path_in_fov (cur_path, fov_map, target_fov_map)) {
+          int cur_to_src = path_map.d[cur.x][cur.y];
+          int cur_to_target = distance_to (cur, target);
+        if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+            best_to_src = cur_to_src;
+            best_to_target = cur_to_target;
             best = cur;
           }
         }
+        delete (cur_path);
+      }
     }
 
     // Upwards segment of spiral ring
     for (int i=1; i <= 2*ring + 1 ; i++) {
       cur.y += 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y))) {
-          int cur_to_src = distance_to (cur, src);
-          int cur_to_loc = distance_to (cur, loc);
-          if (cur_to_loc < best_to_loc 
-              || cur_to_loc == best_to_loc && cur_to_src < best_to_src) {
-            best_to_loc = distance_to (cur, loc);
-            best_to_src = distance_to (cur, src);
+      if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
+        list<Coord>* cur_path = find_path (src, cur, path_map);
+        if (path_in_fov (cur_path, fov_map, target_fov_map)) {
+          int cur_to_src = path_map.d[cur.x][cur.y];
+          int cur_to_target = distance_to (cur, target);
+          if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+            best_to_src = cur_to_src;
+            best_to_target = cur_to_target;
             best = cur;
           }
         }
+        delete (cur_path);
+      }
     }
 
     // Leftwards segment of spiral ring
     for (int i=1; i <= 2*ring + 2 ; i++) {
       cur.x -= 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y))) {
-          int cur_to_src = distance_to (cur, src);
-          int cur_to_loc = distance_to (cur, loc);
-          if (cur_to_loc < best_to_loc 
-              || cur_to_loc == best_to_loc && cur_to_src < best_to_src) {
-            best_to_loc = distance_to (cur, loc);
-            best_to_src = distance_to (cur, src);
+      if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
+        list<Coord>* cur_path = find_path (src, cur, path_map);
+        if (path_in_fov (cur_path, fov_map, target_fov_map)) {
+          int cur_to_src = path_map.d[cur.x][cur.y];
+          int cur_to_target = distance_to (cur, target);
+          if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+            best_to_src = cur_to_src;
+            best_to_target = cur_to_target;
             best = cur;
           }
         }
+        delete (cur_path);
+      }
     }
     // Downwards segment of spiral ring
     for (int i=1; i <= 2*ring + 2 ; i++) {
       cur.y -= 1;
-      if (object->zone->in_bounds (cur))
-        if ((!object->zone->is_blocked (cur)) 
-            && (fov_map->isInFov (cur.x, cur.y))) {
-          int cur_to_src = distance_to (cur, src);
-          int cur_to_loc = distance_to (cur, loc);
-          if (cur_to_loc < best_to_loc 
-              || cur_to_loc == best_to_loc && cur_to_src < best_to_src) {
-            best_to_loc = distance_to (cur, loc);
-            best_to_src = distance_to (cur, src);
+      if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
+        list<Coord>* cur_path = find_path (src, cur, path_map);
+        if (path_in_fov (cur_path, fov_map, target_fov_map)) {
+          int cur_to_src = path_map.d[cur.x][cur.y];
+          int cur_to_target = distance_to (cur, target);
+          if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+            best_to_src = cur_to_src;
+            best_to_target = cur_to_target;
             best = cur;
           }
         }
+        delete (cur_path);
+      }
     }
 
     ring++;
   }
+
+  for (int i=0; i < zone->grid_w; i ++)
+    delete path_map.d[i];
+  delete path_map.d;
+  for (int i=0; i < zone->grid_w; i++)
+    delete path_map.p[i];
+  delete path_map.p;
+  delete (target_fov_map);
 
   return (best);
 }
@@ -192,9 +182,9 @@ void AI::take_turn () {
 
       //move towards player if far away
       if (distance_to (object, (*o)) >= 2) {
-        Coord target = nearest_view_to_target_from_src ((*o)->loc, object->loc);
-        if (target.x >= 0 && target.y >= 0)
-          this->move_towards_smarter (target);
+        Coord dest = closest_dest_to_target (object->loc, (*o)->loc, object->zone);
+        if (dest.x >= 0 && dest.y >= 0)
+          this->move_towards_smarter (dest);
         break;
       }
       //close enough, attack! (if the player is still alive.)
@@ -206,9 +196,9 @@ void AI::take_turn () {
   }
 
   if (!player_spotted && in_pursuit) {
-    Coord target = nearest_view_to_target_from_src (last_seen, object->loc);
-    if (distance_to (object, target) >= 2) {
-      this->move_towards_smarter (target);
+    Coord dest = closest_dest_to_target (object->loc, last_seen, object->zone);
+    if (distance_to (object, dest) >= 2) {
+      this->move_towards_smarter (dest);
     }
   }
 }

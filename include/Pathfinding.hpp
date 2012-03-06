@@ -15,5 +15,7 @@ typedef struct {
 } PathMap;
 
 int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone);
+PathMap dijkstra (const Coord& src, Zone* zone);
+list<Coord>* find_path (const Coord& src, const Coord& dest, const PathMap& path_map);
 
 #endif
