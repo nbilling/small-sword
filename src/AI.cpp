@@ -38,7 +38,7 @@ inline bool AI::path_in_fov (list<Coord>* path, const TCODMap* fov1, const TCODM
 }
 
 // Find closest feasible destination to target, if you start at src
-Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const PathMap& path_map, Zone* zone) {
+Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) {
 
   TCODMap* target_fov_map = new TCODMap (80,45);
   target_fov_map->copy (fov_map);
@@ -54,7 +54,7 @@ Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const P
 
   // Process center of spiral first
   if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-    list<Coord>* cur_path = find_path (src, cur, path_map);
+    list<Coord>* cur_path = find_path (object->loc, cur, path_map);
       if (path_in_fov (cur_path, fov_map, target_fov_map)) {
         int cur_to_src = path_map.d[cur.x][cur.y];
         int cur_to_target = distance_to (cur, target);
@@ -75,7 +75,7 @@ Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const P
     for (int i=1; i <= 2*ring + 1 ; i++) {
       cur.x += 1;
       if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-        list<Coord>* cur_path = find_path (src, cur, path_map);
+        list<Coord>* cur_path = find_path (object->loc, cur, path_map);
         if (path_in_fov (cur_path, fov_map, target_fov_map)) {
           int cur_to_src = path_map.d[cur.x][cur.y];
           int cur_to_target = distance_to (cur, target);
@@ -93,7 +93,7 @@ Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const P
     for (int i=1; i <= 2*ring + 1 ; i++) {
       cur.y += 1;
       if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-        list<Coord>* cur_path = find_path (src, cur, path_map);
+        list<Coord>* cur_path = find_path (object->loc, cur, path_map);
         if (path_in_fov (cur_path, fov_map, target_fov_map)) {
           int cur_to_src = path_map.d[cur.x][cur.y];
           int cur_to_target = distance_to (cur, target);
@@ -111,7 +111,7 @@ Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const P
     for (int i=1; i <= 2*ring + 2 ; i++) {
       cur.x -= 1;
       if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-        list<Coord>* cur_path = find_path (src, cur, path_map);
+        list<Coord>* cur_path = find_path (object->loc, cur, path_map);
         if (path_in_fov (cur_path, fov_map, target_fov_map)) {
           int cur_to_src = path_map.d[cur.x][cur.y];
           int cur_to_target = distance_to (cur, target);
@@ -128,7 +128,7 @@ Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const P
     for (int i=1; i <= 2*ring + 2 ; i++) {
       cur.y -= 1;
       if (object->zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-        list<Coord>* cur_path = find_path (src, cur, path_map);
+        list<Coord>* cur_path = find_path (object->loc, cur, path_map);
         if (path_in_fov (cur_path, fov_map, target_fov_map)) {
           int cur_to_src = path_map.d[cur.x][cur.y];
           int cur_to_target = distance_to (cur, target);
@@ -155,7 +155,7 @@ void AI::approach (const Coord& target) {
   PathMap path_map = dijkstra (object->loc, object->zone);
 
   // calculate dest from path_map
-  Coord dest = closest_dest_to_target (object->loc, target, path_map, object->zone);
+  Coord dest = closest_dest_to_target (target, path_map);
 
   // calculate first step from path_map and dest
   // move

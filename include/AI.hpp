@@ -25,7 +25,7 @@ public:
   void init_fov_map ();
   list<Object*>* visible_objects ();
   void take_turn ();
-  Coord closest_dest_to_target (const Coord& src, const Coord& target, const PathMap& path_map, Zone* zone);
+  Coord closest_dest_to_target (const Coord& target, const PathMap& path_map);
   void approach (const Coord& target);
 
 private:
