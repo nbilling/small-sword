@@ -82,7 +82,7 @@ void TacticalUI::hud_write (int x, int y, const char* s) {
 void TacticalUI::render_hud () {
   //Draw HUD
   char hp[7];
-  sprintf(hp,"HP: %i",player->csheet->hp);
+  sprintf(hp,"HP: %3i",player->csheet->hp);
   hud_write (HUD_HP_X, HUD_HP_Y, hp);
 }
 

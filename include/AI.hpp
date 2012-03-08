@@ -24,11 +24,9 @@ public:
   AI (Object* new_object);
   void init_fov_map ();
   list<Object*>* visible_objects ();
-  void move_towards_smarter (const Coord& target);
-  Coord nearest_view_to_target (const Coord& loc);
-  Coord nearest_view_to_target_from_src (const Coord& loc, const Coord& src);
   void take_turn ();
-  Coord closest_dest_to_target (const Coord& src, const Coord& target, Zone* zone);
+  Coord closest_dest_to_target (const Coord& src, const Coord& target, const PathMap& path_map, Zone* zone);
+  void approach (const Coord& target);
 
 private:
   inline bool path_in_fov (list<Coord>* path, const TCODMap* fov1, const TCODMap* fov2);

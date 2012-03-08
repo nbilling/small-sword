@@ -29,11 +29,6 @@ list<Object*>* AI::visible_objects () {
   return (visible);
 }
 
-void AI::move_towards_smarter (const Coord& target){
-  int dir = pathfind_step_dijkstra (object->loc, target, object->zone);
-  walk (object, dir);
-}
-
 // Return true if each Coord in path is visible from at least one of fov1/fov2
 inline bool AI::path_in_fov (list<Coord>* path, const TCODMap* fov1, const TCODMap* fov2) {
   bool in_fov = true;
@@ -43,10 +38,7 @@ inline bool AI::path_in_fov (list<Coord>* path, const TCODMap* fov1, const TCODM
 }
 
 // Find closest feasible destination to target, if you start at src
-Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, Zone* zone) {
-  // 
-  // 
-  PathMap path_map = dijkstra (src, zone);
+Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, const PathMap& path_map, Zone* zone) {
 
   TCODMap* target_fov_map = new TCODMap (80,45);
   target_fov_map->copy (fov_map);
@@ -153,15 +145,40 @@ Coord AI::closest_dest_to_target (const Coord& src, const Coord& target, Zone* z
     ring++;
   }
 
-  for (int i=0; i < zone->grid_w; i ++)
-    delete path_map.d[i];
-  delete path_map.d;
-  for (int i=0; i < zone->grid_w; i++)
-    delete path_map.p[i];
-  delete path_map.p;
   delete (target_fov_map);
 
   return (best);
+}
+
+void AI::approach (const Coord& target) {
+  // calculate path_map
+  PathMap path_map = dijkstra (object->loc, object->zone);
+
+  // calculate dest from path_map
+  Coord dest = closest_dest_to_target (object->loc, target, path_map, object->zone);
+
+  // calculate first step from path_map and dest
+  // move
+  if (object->zone->in_bounds (dest)) {
+    list<Coord>* path = find_path (object->loc, dest, path_map);
+    if (path->size () > 1) {
+      Coord step_start = path->front ();
+      path->pop_front ();
+      Coord step_end = path->front ();
+      path->pop_front ();
+      int dir = displacement_to_direction 
+                 (step_end.x - step_start.x, 
+                  step_end.y - step_start.y);
+      walk (object, dir);
+    }
+    delete path;
+  }
+  for (int i=0; i < object->zone->grid_w; i ++)
+    delete path_map.d[i];
+  delete path_map.d;
+  for (int i=0; i < object->zone->grid_w; i++)
+    delete path_map.p[i];
+  delete path_map.p;
 }
 
 void AI::take_turn () {
@@ -182,9 +199,7 @@ void AI::take_turn () {
 
       //move towards player if far away
       if (distance_to (object, (*o)) >= 2) {
-        Coord dest = closest_dest_to_target (object->loc, (*o)->loc, object->zone);
-        if (dest.x >= 0 && dest.y >= 0)
-          this->move_towards_smarter (dest);
+        approach ((*o)->loc);
         break;
       }
       //close enough, attack! (if the player is still alive.)
@@ -196,10 +211,7 @@ void AI::take_turn () {
   }
 
   if (!player_spotted && in_pursuit) {
-    Coord dest = closest_dest_to_target (object->loc, last_seen, object->zone);
-    if (distance_to (object, dest) >= 2) {
-      this->move_towards_smarter (dest);
-    }
+    approach (last_seen);
   }
 }
 
