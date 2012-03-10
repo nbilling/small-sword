@@ -3,13 +3,26 @@
 
 #include "cstring"
 #include "cstdlib"
+#include "list"
+#include "iostream"
 #include "libtcod.hpp"
 #include "Types.hpp"
 #include "Zone.hpp"
 #include "CSheet.hpp"
 
+using namespace std;
+
 class Object {
+private:
+  static int next_id;
+  static list<int>* recycled_ids;
+  static int object_count;
+
+  int get_next_id ();
+  void recycle_id ();
+
 public:
+  int id;
   Zone* zone;
   Coord loc;
   char c;
@@ -26,6 +39,7 @@ public:
   void move (int dx, int dy);
 
   void move_to (const Coord& new_loc);
+
 };
 
 #endif

@@ -1,7 +1,38 @@
 #include "Object.hpp"
 
+int Object::next_id;
+list<int>* Object::recycled_ids;
+int Object::object_count;
+
+int Object::get_next_id () {
+  object_count++;
+
+  if (!recycled_ids)
+    recycled_ids = new list<int> ();
+
+  if (recycled_ids->empty ()) {
+    return (next_id++);
+  }
+  else {
+    int retval = recycled_ids->front ();
+    recycled_ids->pop_front ();
+    return (retval);
+  }
+}
+
+void Object::recycle_id () {
+  object_count--;
+  if (object_count == 0) {
+    next_id = 0;
+    delete (recycled_ids);
+  }
+  else
+    recycled_ids->push_front (id);
+}
+
 Object::Object (Zone* new_zone, const Coord& new_loc, char new_c, const char* new_name, 
                 TCODColor new_color, bool new_blocks, CSheet* new_csheet) {
+  id = get_next_id ();
   zone = new_zone;
   loc = new_loc;
   c = new_c;
@@ -13,6 +44,7 @@ Object::Object (Zone* new_zone, const Coord& new_loc, char new_c, const char* ne
 }
 
 Object::~Object () {
+  recycle_id ();
   free (name);
 }
  
