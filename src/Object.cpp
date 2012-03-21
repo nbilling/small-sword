@@ -30,11 +30,9 @@ void Object::recycle_id () {
     recycled_ids->push_front (id);
 }
 
-Object::Object (Zone* new_zone, const Coord& new_loc, char new_c, const char* new_name, 
-                TCODColor new_color, bool new_blocks, CSheet* new_csheet) {
+Object::Object (char new_c, const char* new_name, TCODColor new_color, 
+                bool new_blocks, CSheet* new_csheet) {
   id = get_next_id ();
-  zone = new_zone;
-  loc = new_loc;
   c = new_c;
   name = (char*) malloc (1 + sizeof (char) * strlen (new_name));
   strcpy (name, new_name);
@@ -45,14 +43,7 @@ Object::Object (Zone* new_zone, const Coord& new_loc, char new_c, const char* ne
 
 Object::~Object () {
   recycle_id ();
-  free (name);
-}
- 
-void Object::move (int dx, int dy) {
-  loc.x += dx;
-  loc.y += dy;
-}
+  delete (name);
+  delete (csheet);
 
-void Object:: move_to (const Coord& new_loc) {
-  loc = new_loc;
 }

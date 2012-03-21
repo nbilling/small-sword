@@ -13,17 +13,22 @@
 #define FOV_ALGO 0  
 #define FOV_LIGHT_WALLS true
 #define TORCH_RADIUS 10
+#define INF INT_MAX
 
 class AI {
 public:
   TCODMap* fov_map;
+  Zone* zone;
+
   Object* object;
+  Coord object_loc;
+
   int in_pursuit;
   Coord last_seen;
 
-  AI (Object* new_object);
+  AI (Object* new_object, const Coord& loc, Zone* zone);
   void init_fov_map ();
-  list<Object*>* visible_objects ();
+  map<int,Coord>* visible_objects ();
   void take_turn ();
   Coord closest_dest_to_target (const Coord& target, const PathMap& path_map);
   void approach (const Coord& target);

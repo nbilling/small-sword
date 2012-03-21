@@ -23,23 +23,16 @@ private:
 
 public:
   int id;
-  Zone* zone;
-  Coord loc;
   char c;
   char* name;
   TCODColor color;
   bool blocks;
   CSheet* csheet;
 
-  Object (Zone* zone, const Coord& new_loc, char new_c, const char* new_name, 
-          TCODColor new_color, bool new_blocks, CSheet* new_csheet);
+  Object (char new_c, const char* new_name, TCODColor new_color, 
+          bool new_blocks, CSheet* new_csheet);
 
   ~Object ();
- 
-  void move (int dx, int dy);
-
-  void move_to (const Coord& new_loc);
-
 };
 
 #endif

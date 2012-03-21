@@ -47,25 +47,34 @@ void TacticalUI::render_grid () {
 
 void TacticalUI::render_objects () {
   //Draw all objects on current zone
-  for (list<Object*>::iterator o = zone->objects->begin ();
-       o != zone->objects->end ();
-       o++) {
-    //Only show if it's visible to the player
-    if (fov_map->isInFov ((*o)->loc.x, (*o)->loc.y)) {
-      //Set the color and then draw the character for this object
-      map_console->setCharForeground ((*o)->loc.x, (*o)->loc.y, (*o)->color);
-      map_console->putChar ((*o)->loc.x, (*o)->loc.y, (*o)->c, TCOD_BKGND_NONE);
+  for (int i = 0; i < zone->grid_w; i++) {
+    for (int j = 0; j < zone->grid_h; j++) {
+      //Only show if it's visible to the player        
+      if (fov_map->isInFov (i,j)) {
+        list<int>* temp = zone->objects_at ((Coord){i,j});
+        if (!temp->empty ()) {
+          Object* o = (*(zone->object_registry))[temp->front ()];
+          //Set the color and then draw the character for this object
+          map_console->setCharForeground (i, j, o->color);
+          map_console->putChar (i, j, o->c, TCOD_BKGND_NONE);
+        }
+        delete (temp);
+      }
     }
   }
 }
 
 void TacticalUI::clear_objects () {
   //Clear all object characters from map
-  for (list<Object*>::iterator o = zone->objects->begin ();
-       o != zone->objects->end ();
-       o++) {
-    //Erase the character for this object
-    map_console->putChar ((*o)->loc.x, (*o)->loc.y, ' ', TCOD_BKGND_NONE);
+  for (int i = 0; i < zone->grid_w; i++) {
+    for (int j = 0; j < zone->grid_h; j++) {
+      list<int>* temp = zone->objects_at ((Coord){i,j});
+      if (!temp->empty ()) {
+        //Erase the character for this object
+        map_console->putChar (i, j, ' ', TCOD_BKGND_NONE);
+      }
+      delete (temp);
+    }
   }
 }
 
@@ -90,6 +99,9 @@ int TacticalUI::handle_keys () {
   TCOD_key_t key = {TCODK_NONE,0};
   TCOD_mouse_t mouse;
 
+  if (!zone) 
+    cout << "null zone in handle_keys" << endl;
+
   //    TCOD_key_t key = TCODConsole::waitForKeypress (true);
   TCODSystem::waitForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),&key,&mouse, false);
 
@@ -104,35 +116,35 @@ int TacticalUI::handle_keys () {
   if (game_state == GS_PLAYING) {
     //Movement keys
     if (key.vk == TCODK_CHAR && key.c == 'k') {
-      walk (player, 0, -1);
+      walk (player, zone, 0, -1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c =='j') {
-      walk (player, 0, 1);
+      walk (player, zone, 0, 1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'h') {
-      walk (player, -1, 0);
+      walk (player, zone, -1, 0);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'l') {
-      walk (player, 1, 0);
+      walk (player, zone, 1, 0);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'y') {
-      walk (player, -1, -1);
+      walk (player, zone, -1, -1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'u') {
-      walk (player, 1, -1);
+      walk (player, zone, 1, -1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'b') {
-      walk (player, -1, 1);
+      walk (player, zone, -1, 1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'n') {
-      walk (player, 1, 1);
+      walk (player, zone, 1, 1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'x') {
@@ -146,21 +158,26 @@ int TacticalUI::display () {
   fov_recompute = true;
   game_state = GS_PLAYING;
   player_action = PA_NONE;
-    
+
   while (!TCODConsole::isWindowClosed ()) {
     if (fov_recompute) {
       fov_recompute = false;
-      fov_map->computeFov (player->loc.x, player->loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS); 
+      Coord player_loc = zone->location_of (player->id);
+      fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS, 
+                           FOV_LIGHT_WALLS); 
     }
     render_grid ();
     render_objects ();
-    TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, TCODConsole::root, 0, 0);
+
+    TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
+                       TCODConsole::root, 0, 0);
     render_hud ();
-    TCODConsole::blit (hud_console, 0, 0, hud_console_w, hud_console_h, TCODConsole::root, 80, 0);
+    TCODConsole::blit (hud_console, 0, 0, hud_console_w, hud_console_h, 
+                       TCODConsole::root, 80, 0);
     TCODConsole::flush ();
     clear_objects ();
       
-    if (handle_keys () == -1) {    
+    if (handle_keys () == -1) {
       break;
     }
 

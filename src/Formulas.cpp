@@ -1,17 +1,5 @@
 #include "Formulas.hpp"
 
-int distance_to (Object* src_object, Object* dest_object) {
-  float dx = (float) dest_object->loc.x - src_object->loc.x;
-  float dy = (float) dest_object->loc.y - src_object->loc.y;    
-  return ((int) sqrt (pow (dx, 2) + pow (dy, 2)));
-}
-
-int distance_to (Object* src_object, const Coord& dest) {
-  float dx = (float) dest.x - src_object->loc.x;
-  float dy = (float) dest.y - src_object->loc.y;    
-  return ((int) sqrt (pow (dx, 2) + pow (dy, 2)));
-}
-
 int distance_to (const Coord& src, const Coord& dest) {
   float dx = (float) dest.x - src.x;
   float dy = (float) dest.y - src.y;    
