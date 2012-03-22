@@ -99,9 +99,6 @@ int TacticalUI::handle_keys () {
   TCOD_key_t key = {TCODK_NONE,0};
   TCOD_mouse_t mouse;
 
-  if (!zone) 
-    cout << "null zone in handle_keys" << endl;
-
   //    TCOD_key_t key = TCODConsole::waitForKeypress (true);
   TCODSystem::waitForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),&key,&mouse, false);
 
@@ -176,7 +173,7 @@ int TacticalUI::display () {
                        TCODConsole::root, 80, 0);
     TCODConsole::flush ();
     clear_objects ();
-      
+    
     if (handle_keys () == -1) {
       break;
     }
