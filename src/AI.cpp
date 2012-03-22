@@ -21,8 +21,8 @@ void AI::init_fov_map () {
 
 map<int,Coord>* AI::visible_objects () {
   map<int,Coord>* retval = new map<int,Coord> ();
-  for (int i = 0; i < zone->grid_h; i ++)
-    for (int j = 0; j < zone->grid_w; j++)
+  for (int i = 0; i < zone->grid_w; i ++)
+    for (int j = 0; j < zone->grid_h; j++)
       if (fov_map->isInFov (i,j)) {
         list<int>* temp = zone->objects_at ((Coord){i,j});
         for (list<int>::iterator it = temp->begin ();
@@ -162,11 +162,10 @@ void AI::approach (const Coord& target) {
 
   // calculate dest from path_map
   Coord dest = closest_dest_to_target (target, path_map);
-
+  
   // calculate first step from path_map and dest
   // move
   if (zone->in_bounds (dest)) {
-    Coord test = zone->location_of (object->id);
     list<Coord>* path = find_path (object_loc, dest, path_map);
     if (path->size () > 1) {
       Coord step_start = path->front ();
@@ -221,7 +220,10 @@ void AI::take_turn () {
   }
 
   if (!player_spotted && in_pursuit) {
-    approach (last_seen);
+    if (coord_eq (object_loc, last_seen))
+      in_pursuit = false;
+    else
+      approach (last_seen);
   }
 
   delete (visible);
