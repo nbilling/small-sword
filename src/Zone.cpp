@@ -2,9 +2,8 @@
 
 using namespace std;
 
-Zone::Zone (int new_grid_w, int new_grid_h, map<int,Object*>* new_object_registry){
+Zone::Zone (int new_grid_w, int new_grid_h){
   object_locations = new map<int,Coord> ();
-  object_registry = new_object_registry;
 
   grid = (Tile::Tile***) malloc (sizeof (Tile::Tile**) * new_grid_w);
   for (int x=0; x < new_grid_w; x++){
@@ -26,7 +25,6 @@ Zone::Zone (int new_grid_w, int new_grid_h, map<int,Object*>* new_object_registr
 
 Zone::~Zone () {
   delete (object_locations);
-  // Note: does not deallocate the object_registry.
   for (int i=0; i < grid_w; i++)
     delete (blocked[i]);
   delete (blocked);
@@ -52,7 +50,7 @@ void Zone::place_object (int object_id,  const Coord& loc) {
     return;
   (*object_locations)[object_id] = loc;
   blocked[loc.x][loc.y] = grid[loc.x][loc.y]->blocked
-    || ((*object_registry)[object_id])->blocks;
+    || (Object::get_object_by_id (object_id))->blocks;
 }
 
 // Move object given by object_id to loc. Do nothing if loc is blocked.
@@ -65,7 +63,7 @@ void Zone::move_object (int object_id,  const Coord& loc) {
   blocked[old_loc.x][old_loc.y] = grid[old_loc.x][old_loc.y]->blocked;
   (*object_locations)[object_id] = loc;
   blocked[loc.x][loc.y] = grid[loc.x][loc.y]->blocked
-    || ((*object_registry)[object_id])->blocks;
+    || (Object::get_object_by_id (object_id))->blocks;
 }
 
 bool Zone::is_blocked (const Coord& loc) {

@@ -17,6 +17,7 @@ private:
   static int next_id;
   static list<int>* recycled_ids;
   static int object_count;
+  static map<int, Object*>* object_registry;
 
   int get_next_id ();
   void recycle_id ();
@@ -33,6 +34,10 @@ public:
           bool new_blocks, CSheet* new_csheet);
 
   ~Object ();
+
+  static void delete_registered_objects ();
+
+  static Object* get_object_by_id (int target_id);
 };
 
 #endif

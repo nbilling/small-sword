@@ -14,7 +14,6 @@ class Zone{
 public:
   // Inhabitants
   map<int,Coord>* object_locations;
-  map<int,Object*>* object_registry;
 
   // Bookkeeping
   bool** blocked;
@@ -26,7 +25,7 @@ public:
   int grid_w;
   int grid_h;
 
-  Zone (int new_grid_w, int new_grid_h, map<int,Object*>* object_registry);
+  Zone (int new_grid_w, int new_grid_h);
 
   ~Zone ();
 

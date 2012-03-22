@@ -53,7 +53,7 @@ void TacticalUI::render_objects () {
       if (fov_map->isInFov (i,j)) {
         list<int>* temp = zone->objects_at ((Coord){i,j});
         if (!temp->empty ()) {
-          Object* o = (*(zone->object_registry))[temp->front ()];
+          Object* o = Object::get_object_by_id (temp->front ());
           //Set the color and then draw the character for this object
           map_console->setCharForeground (i, j, o->color);
           map_console->putChar (i, j, o->c, TCOD_BKGND_NONE);

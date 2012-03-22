@@ -27,6 +27,6 @@ void create_v_tunnel (Zone* zone, int y1, int y2, int x);
 
 void place_objects (Zone* zone, list<AI*>* ais, const Rect* room);
 
-void make_grid (Zone* zone, map<int,Object*>* object_registry, list<AI*>* ais);
+void make_grid (Zone* zone, list<AI*>* ais);
 
 #endif

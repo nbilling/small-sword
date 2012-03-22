@@ -42,12 +42,6 @@ void find_empty_tile (Zone* zone, Object* player) {
   }
 }
 
-void delete_registered_objects (map<int,Object*>* object_registry) {
-  for (map<int,Object*>::iterator m = object_registry->begin (); 
-       m != object_registry->end (); m++)
-    delete ((*m).second);
-}
-
 int main (int argc, const char** argv) {
   TCODConsole::setCustomFont ("data/arial10x10.png", TCOD_FONT_TYPE_GREYSCALE | TCOD_FONT_LAYOUT_TCOD);
   cerr << "+ Init root console" << endl;
@@ -60,21 +54,17 @@ int main (int argc, const char** argv) {
   cerr << "+ Create offscreen hud console" << endl;
   TCODConsole* hud_console = new TCODConsole::TCODConsole (HUD_CONSOLE_WIDTH, HUD_CONSOLE_HEIGHT);  
 
-  cerr << "+ Create Object registry" << endl;
-  map<int,Object*>* object_registry = new map<int,Object*> ();
-
   cerr << "+ Create zone" << endl;
-  Zone* zone = new Zone (GRID_WIDTH, GRID_HEIGHT, object_registry);
+  Zone* zone = new Zone (GRID_WIDTH, GRID_HEIGHT);
 
   cerr << "+ Create AI list" << endl;
   list<AI*>* ais = new list<AI*>();
 
   cerr << "+ Generate dungeon" << endl;
-  make_grid (zone, object_registry, ais);
+  make_grid (zone, ais);
   
   cerr << "+ Create player" << endl;
   Object* player = new Object ('@', "player", TCODColor::white, true, new CSheet(20));
-  (*object_registry)[player->id] = player;
 
   cerr << "+ Place player" << endl;
   find_empty_tile (zone, player);
@@ -105,8 +95,7 @@ int main (int argc, const char** argv) {
   delete hud_console;
   delete fov_map;
   delete zone;
-  delete_registered_objects (object_registry);
-  delete (object_registry);
+  Object::delete_registered_objects ();
   cerr << "+ Memory deallocation completed" << endl;
 
   return(0);

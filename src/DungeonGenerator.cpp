@@ -36,8 +36,7 @@ void create_v_tunnel (Zone* zone, int y1, int y2, int x) {
   }
 }
 
-void place_objects (Zone* zone, map<int,Object*>* object_registry, 
-                    list<AI*>* ais, const Rect* room) {
+void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
   TCODRandom* rng = TCODRandom::getInstance();
   //choose random number of monsters
   int num_monsters = rng->getInt(0, MAX_ROOM_MONSTERS);
@@ -60,7 +59,6 @@ void place_objects (Zone* zone, map<int,Object*>* object_registry,
         monster = new Object('T', "troll", TCODColor::darkerGreen, 
                              true, new CSheet(15));
       }
-      (*object_registry)[monster->id] = monster;
       zone->place_object (monster->id, (Coord){x,y});
       AI* ai = new AI (monster, (Coord){x,y}, zone);
       ais->push_back(ai);
@@ -68,7 +66,7 @@ void place_objects (Zone* zone, map<int,Object*>* object_registry,
   }
 }
 
-void make_grid (Zone* zone, map<int,Object*>* object_registry, list<AI*>* ais) {
+void make_grid (Zone* zone, list<AI*>* ais) {
   TCODRandom* rng = TCODRandom::getInstance();
   list<Rect*>* rooms = new list<Rect*>();    
   int num_rooms = 0;        
@@ -93,7 +91,7 @@ void make_grid (Zone* zone, map<int,Object*>* object_registry, list<AI*>* ais) {
       //No intersections so "paint" it to the grid's tiles
       create_room(zone, new_room); 
       //Add random contents to this room, such as monsters
-      place_objects(zone, object_registry, ais, new_room); 
+      place_objects(zone, ais, new_room); 
       int new_x = new_room->center_x();
       int new_y = new_room->center_y(); 
       if (num_rooms > 0) {

@@ -166,6 +166,7 @@ void AI::approach (const Coord& target) {
   // calculate first step from path_map and dest
   // move
   if (zone->in_bounds (dest)) {
+    Coord test = zone->location_of (object->id);
     list<Coord>* path = find_path (object_loc, dest, path_map);
     if (path->size () > 1) {
       Coord step_start = path->front ();
@@ -176,6 +177,7 @@ void AI::approach (const Coord& target) {
                  (step_end.x - step_start.x, 
                   step_end.y - step_start.y);
       walk (object, zone, dir);
+      object_loc = step_end;
     }
     delete path;
   }
@@ -198,7 +200,7 @@ void AI::take_turn () {
   int player_spotted = false;
   for (map<int,Coord>::iterator it = visible->begin ();
        it != visible->end(); it++) {
-    Object* o = (*(zone->object_registry))[(*it).first];
+    Object* o = Object::get_object_by_id ((*it).first);
     Coord o_loc = (*it).second;
     if (strcmp (o->name, "player") == 0) {
       player_spotted = true;
