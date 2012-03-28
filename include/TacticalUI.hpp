@@ -19,14 +19,13 @@
 #define HUD_HP_Y 41
 
 #define GS_PLAYING 1
-#define PA_NONE 0
 
 class TacticalUI {
-public:
+private:
   Zone* zone;
   list<AI*>* ais;
   Object* player;
-  TCODMap* fov_map;
+  TCODMap* player_fov_map;
   TCODConsole* map_console;
   int map_console_w;
   int map_console_h;
@@ -36,12 +35,7 @@ public:
 
   bool fov_recompute;
   int game_state;
-  int player_action;
 
-  TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_fov_map, 
-              TCODConsole* new_map_console, int new_map_console_w, int new_map_console_h, 
-              TCODConsole* new_hud_console, int new_hud_console_w, int new_hud_console_h);
-  
   void render_grid ();
 
   void render_objects ();
@@ -53,6 +47,11 @@ public:
   void render_hud ();
 
   int handle_keys ();
+  
+public:
+  TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_player_fov_map, 
+              TCODConsole* new_map_console, int new_map_console_w, int new_map_console_h, 
+              TCODConsole* new_hud_console, int new_hud_console_w, int new_hud_console_h);
   
   int display ();
 };

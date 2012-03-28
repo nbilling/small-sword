@@ -1,18 +1,11 @@
-//Standard library
 #include "iostream"
 #include "list"
-using namespace std;
-
-//libtcod
 #include "libtcod.hpp"
-
-//My files
 #include "AI.hpp"
 #include "TacticalUI.hpp"
 #include "Zone.hpp"
 #include "DungeonGenerator.hpp"
-
-//#include "TacticalUI.cpp"
+using namespace std;
 
 //Definitions
 #define ROOT_CONSOLE_WIDTH 100

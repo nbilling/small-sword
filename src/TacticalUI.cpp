@@ -1,13 +1,13 @@
 #include "TacticalUI.hpp"
 
 
-TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_fov_map, 
+TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_player_fov_map, 
                         TCODConsole* new_map_console, int new_map_console_w, int new_map_console_h, 
                         TCODConsole* new_hud_console, int new_hud_console_w, int new_hud_console_h) {
   zone = new_zone;
   ais = new_ais;
   player = new_player;
-  fov_map = new_fov_map;
+  player_fov_map = new_player_fov_map;
   map_console = new_map_console;
   map_console_w = new_map_console_w;
   map_console_h = new_map_console_h;
@@ -20,7 +20,7 @@ void TacticalUI::render_grid () {
   //Draw the grid 
   for (int y=0; y < zone->grid_h; y++){
     for (int x=0; x < zone->grid_w; x++){
-      int visible = fov_map->isInFov (x, y);
+      int visible = player_fov_map->isInFov (x, y);
       int wall = zone->grid[x][y]->block_sight;
       if (!visible){
         if (zone->grid[x][y]->explored) {
@@ -50,7 +50,7 @@ void TacticalUI::render_objects () {
   for (int i = 0; i < zone->grid_w; i++) {
     for (int j = 0; j < zone->grid_h; j++) {
       //Only show if it's visible to the player        
-      if (fov_map->isInFov (i,j)) {
+      if (player_fov_map->isInFov (i,j)) {
         list<int>* temp = zone->objects_at ((Coord){i,j});
         if (!temp->empty ()) {
           Object* o = Object::get_object_by_id (temp->front ());
@@ -154,13 +154,12 @@ int TacticalUI::handle_keys () {
 int TacticalUI::display () {
   fov_recompute = true;
   game_state = GS_PLAYING;
-  player_action = PA_NONE;
 
   while (!TCODConsole::isWindowClosed ()) {
     if (fov_recompute) {
       fov_recompute = false;
       Coord player_loc = zone->location_of (player->id);
-      fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS, 
+      player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS, 
                            FOV_LIGHT_WALLS); 
     }
     render_grid ();
@@ -178,9 +177,9 @@ int TacticalUI::display () {
       break;
     }
 
-    for (list<AI*>::iterator ai = ais->begin();
-         ai != ais->end(); ai++){
-      (*ai)->take_turn();
+    for (list<AI*>::iterator ai = ais->begin ();
+         ai != ais->end (); ai++){
+      (*ai)->take_turn ();
     }    
   }
   return (0);
