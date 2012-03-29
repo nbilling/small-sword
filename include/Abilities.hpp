@@ -17,13 +17,13 @@ enum AbilityType {
   Walk, Step
 };
 
-struct Ability {
+typedef struct {
   enum AbilityType type;
   union {
     AbilityWalk walk_data;
     AbilityStep step_data;
   } ability_data;
-};
+} AbilityInvocation;
 
 void walk (int obj_id, Zone* zone, list<Coord>* path);
 
