@@ -10,15 +10,20 @@
 #include "Object.hpp"
 #include "AI.hpp"
 
-#define color_dark_wall TCODColor::darkGrey
-#define color_light_wall TCODColor::lightGrey
-#define color_dark_ground TCODColor::darkOrange
+#define color_dark_wall TCODColor::darkerGrey
+#define color_light_wall TCODColor::grey
+#define color_dark_ground TCODColor::darkerOrange
 #define color_light_ground TCODColor::desaturatedOrange
 
 #define HUD_HP_X 1
 #define HUD_HP_Y 41
 
 #define GS_PLAYING 1
+
+typedef struct {
+  TCOD_key_t key;
+  Coord coord;
+} TargetData;  
 
 class TacticalUI {
 private:
@@ -46,8 +51,10 @@ private:
 
   void render_hud ();
 
+  TargetData targeter ();
+
   int handle_keys ();
-  
+ 
 public:
   TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_player_fov_map, 
               TCODConsole* new_map_console, int new_map_console_w, int new_map_console_h, 

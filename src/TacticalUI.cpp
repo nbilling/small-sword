@@ -55,8 +55,8 @@ void TacticalUI::render_objects () {
         if (!temp->empty ()) {
           Object* o = Object::get_object_by_id (temp->front ());
           //Set the color and then draw the character for this object
-          map_console->setCharForeground (i, j, o->color);
           map_console->putChar (i, j, o->c, TCOD_BKGND_NONE);
+          map_console->setCharForeground (i, j, o->color);
         }
         delete (temp);
       }
@@ -68,12 +68,7 @@ void TacticalUI::clear_objects () {
   //Clear all object characters from map
   for (int i = 0; i < zone->grid_w; i++) {
     for (int j = 0; j < zone->grid_h; j++) {
-      list<int>* temp = zone->objects_at ((Coord){i,j});
-      if (!temp->empty ()) {
-        //Erase the character for this object
-        map_console->putChar (i, j, ' ', TCOD_BKGND_NONE);
-      }
-      delete (temp);
+      map_console->putChar (i, j, ' ', TCOD_BKGND_NONE);
     }
   }
 }
@@ -93,6 +88,80 @@ void TacticalUI::render_hud () {
   char hp[7];
   sprintf(hp,"HP: %3i",player->csheet->hp);
   hud_write (HUD_HP_X, HUD_HP_Y, hp);
+}
+
+TargetData TacticalUI::targeter () {
+  TCOD_key_t key = {TCODK_NONE,0};
+  TCOD_mouse_t mouse;
+
+  TCODConsole* targeter_console = new TCODConsole::TCODConsole (1,1);
+  targeter_console->putChar (0, 0, 'X', TCOD_BKGND_NONE);
+  targeter_console->setCharForeground (0, 0, TCODColor::grey);
+
+  Coord coord = zone->location_of (player->id);
+
+  while (1) {
+    TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
+                       TCODConsole::root, 0, 0);
+    TCODColor coord_bk = map_console->getCharBackground (coord.x, coord.y);
+    targeter_console->setCharBackground (0, 0, coord_bk);
+    TCODConsole::blit (targeter_console, 0, 0, 1, 1, 
+                       TCODConsole::root, coord.x, coord.y);
+    TCODConsole::flush ();
+
+  TCODSystem::waitForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),&key,&mouse, false);
+    // Fullscreen
+    if (key.vk == TCODK_ENTER && (key.lalt || key.ralt)) {
+      TCODConsole::setFullscreen (!TCODConsole::isFullscreen());
+    }
+    // Select target
+    else if (key.vk == TCODK_ENTER && !(key.lalt || key.ralt)) {
+      delete (targeter_console);
+      return ((TargetData) {key, coord});
+    }
+    // Cancel
+    else if (key.vk == TCODK_ESCAPE) {
+      delete (targeter_console);
+      return ((TargetData) {key, ((Coord) {0,0})});
+    }
+    // Movement
+    else if (key.vk == TCODK_CHAR && key.c == 'k') {
+      //up
+      coord.y--;
+    }
+    else if (key.vk == TCODK_CHAR && key.c =='j') {
+      //down
+      coord.y++;
+    }
+    else if (key.vk == TCODK_CHAR && key.c == 'h') {
+      //left
+      coord.x--;
+    }
+    else if (key.vk == TCODK_CHAR && key.c == 'l') {
+      //right
+      coord.x++;
+    }
+    else if (key.vk == TCODK_CHAR && key.c == 'y') {
+      //up-left
+      coord.x--;
+      coord.y--;
+    }
+    else if (key.vk == TCODK_CHAR && key.c == 'u') {
+      //up-right
+      coord.x++;
+      coord.y--;
+    }
+    else if (key.vk == TCODK_CHAR && key.c == 'b') {
+      //down-left
+      coord.x--;
+      coord.y++;
+    }
+    else if (key.vk == TCODK_CHAR && key.c == 'n') {
+      //down-right
+      coord.x++;
+      coord.y++;
+    }
+  }
 }
 
 int TacticalUI::handle_keys () {
@@ -146,6 +215,7 @@ int TacticalUI::handle_keys () {
     }
     else if (key.vk == TCODK_CHAR && key.c == 'x') {
       // Call function to do targetting.
+      targeter ();
     }
   }    
   return (0);
@@ -163,6 +233,7 @@ int TacticalUI::display () {
                            FOV_LIGHT_WALLS); 
     }
     render_grid ();
+    clear_objects ();
     render_objects ();
 
     TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
@@ -171,7 +242,6 @@ int TacticalUI::display () {
     TCODConsole::blit (hud_console, 0, 0, hud_console_w, hud_console_h, 
                        TCODConsole::root, 80, 0);
     TCODConsole::flush ();
-    clear_objects ();
     
     if (handle_keys () == -1) {
       break;
