@@ -14,12 +14,15 @@ typedef struct {
 } AbilityStep;
 
 enum AbilityType {
-  Walk, Step
+  AbilityNull,
+  AbilityWalk, 
+  AbilityStep
 };
 
 typedef struct {
   enum AbilityType type;
   union {
+    void null_data;
     AbilityWalk walk_data;
     AbilityStep step_data;
   } ability_data;
