@@ -182,35 +182,35 @@ int TacticalUI::handle_keys () {
   if (game_state == GS_PLAYING) {
     //Movement keys
     if (key.vk == TCODK_CHAR && key.c == 'k') {
-      walk (player, zone, 0, -1);
+      step (player->id, zone, 8);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c =='j') {
-      walk (player, zone, 0, 1);
+      step (player->id, zone, 2);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'h') {
-      walk (player, zone, -1, 0);
+      step (player->id, zone, 4);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'l') {
-      walk (player, zone, 1, 0);
+      step (player->id, zone, 6);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'y') {
-      walk (player, zone, -1, -1);
+      step (player->id, zone, 7);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'u') {
-      walk (player, zone, 1, -1);
+      step (player->id, zone, 9);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'b') {
-      walk (player, zone, -1, 1);
+      step (player->id, zone, 1);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'n') {
-      walk (player, zone, 1, 1);
+      step (player->id, zone, 3);
       fov_recompute = true;
     }
     else if (key.vk == TCODK_CHAR && key.c == 'x') {

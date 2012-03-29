@@ -1,9 +1,22 @@
 #include "Abilities.hpp"
 #include "iostream"
 
-void walk (Object* actor, Zone* zone, int direction) {
-  Coord new_loc = (*(zone->object_locations))[actor->id];
+void walk (int obj_id, Zone* zone, list<Coord>* path) {
+  for (list<Coord>::iterator it = path->begin (); 
+       it != path->end (); it++) {
+    if (!zone->in_bounds (*it)) {
+      cerr << "Abilities => walk => attempt to walk out of bounds" << endl;
+      break;
+    }
+    if (zone->is_blocked (*it))
+      break;
+    zone->move_object (obj_id, *it);
+  }
+}
 
+void step (int obj_id, Zone* zone, int direction) {
+  list<Coord>* path = new list<Coord> ();
+  Coord new_loc = zone->location_of (obj_id);
   switch (direction) {
     case 1:
       new_loc.x += -1;
@@ -42,28 +55,8 @@ void walk (Object* actor, Zone* zone, int direction) {
       new_loc.y += -1;
       break;
     }
-
-  if (zone->in_bounds (new_loc)) {
-    if (!(zone->is_blocked (new_loc))){
-      zone->move_object (actor->id, new_loc);
-    }
-  }
-  else
-    cerr << "Abilities => walk => Attempt to walk out of bounds." << endl;
-}
-
-void walk (Object* actor, Zone* zone, int dx, int dy) {
-  Coord new_loc = (*(zone->object_locations))[actor->id];
-  new_loc.x += dx;
-  new_loc.y += dy;
-
-  if (zone->in_bounds (new_loc)) {
-    if (!(zone->is_blocked (new_loc))){
-      zone->move_object (actor->id, new_loc);
-    }
-  }
-  else
-    cerr << "Abilities => walk => Attempt to walk out of bounds." << endl;
+  path->push_front (new_loc);
+  walk (obj_id, zone, path);
 }
 
 void attack (Object* src_object, Object* dest_object) {

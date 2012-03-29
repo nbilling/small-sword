@@ -5,9 +5,9 @@
 #include "Formulas.hpp"
 #include "Object.hpp"
 
-void walk (Object* actor, Zone* zone, int direction);
+void walk (int obj_id, Zone* zone, list<Coord>* path);
 
-void walk (Object* actor, Zone* zone, int dx, int dy);
+void step (int obj_id, Zone* zone, int direction);      
 
 void attack (Object* src_object, Object* dest_object);
 

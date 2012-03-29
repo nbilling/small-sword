@@ -175,7 +175,7 @@ void AI::approach (const Coord& target) {
       int dir = displacement_to_direction 
                  (step_end.x - step_start.x, 
                   step_end.y - step_start.y);
-      walk (object, zone, dir);
+      step (object->id, zone, dir);
       object_loc = step_end;
     }
     delete path;
