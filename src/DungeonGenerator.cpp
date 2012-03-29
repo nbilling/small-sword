@@ -51,12 +51,12 @@ void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
       Object* monster;
       if (rng->getInt(0, 100) < 80) {  //80% chance of getting an orc
         //create an orc
-        monster = new Object('o', "orc", TCODColor::desaturatedGreen, 
+        monster = new Object('o', "orc", TCODColor::chartreuse, 
                              true, new CSheet(10));
       }
       else {
         //create a troll
-        monster = new Object('T', "troll", TCODColor::darkerGreen, 
+        monster = new Object('T', "troll", TCODColor::sea, 
                              true, new CSheet(15));
       }
       zone->place_object (monster->id, (Coord){x,y});
