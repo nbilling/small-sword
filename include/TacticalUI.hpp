@@ -9,7 +9,6 @@
 #include "Zone.hpp"
 #include "Object.hpp"
 #include "AI.hpp"
-#include <cstddef>
 using namespace std;
 
 #define HUD_HP_X 1
@@ -46,6 +45,10 @@ private:
   void hud_write (int x, int y, const char* s);
 
   void render_hud ();
+
+  void blit_map_console ();
+
+  void blit_hud_console ();
 
   TargetData targeter ();
 

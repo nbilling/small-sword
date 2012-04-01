@@ -93,6 +93,16 @@ void TacticalUI::render_hud () {
   hud_write (HUD_HP_X, HUD_HP_Y, hp);
 }
 
+void TacticalUI::blit_map_console () {
+  TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
+                     TCODConsole::root, 0, 0);
+}
+
+void TacticalUI::blit_hud_console () {
+  TCODConsole::blit (hud_console, 0, 0, hud_console_w, hud_console_h, 
+                     TCODConsole::root, 80, 0);
+}  
+
 TargetData TacticalUI::targeter () {
   TCOD_key_t key = {TCODK_NONE,0};
   TCOD_mouse_t mouse;
@@ -104,15 +114,15 @@ TargetData TacticalUI::targeter () {
   Coord coord = zone->location_of (player->id);
 
   while (1) {
-    TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
-                       TCODConsole::root, 0, 0);
+    blit_map_console ();
     TCODColor coord_bk = map_console->getCharBackground (coord.x, coord.y);
     targeter_console->setCharBackground (0, 0, coord_bk);
     TCODConsole::blit (targeter_console, 0, 0, 1, 1, 
                        TCODConsole::root, coord.x, coord.y);
     TCODConsole::flush ();
 
-  TCODSystem::waitForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),&key,&mouse, false);
+  TCODSystem::waitForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),
+                           &key,&mouse, false);
     // Fullscreen
     if (key.vk == TCODK_ENTER && (key.lalt || key.ralt)) {
       TCODConsole::setFullscreen (!TCODConsole::isFullscreen());
@@ -212,8 +222,7 @@ AbilityInvocation* TacticalUI::handle_keys () {
     else if (key.vk == TCODK_CHAR && key.c == 'x') {
       // Call function to do targetting.
       targeter ();
-      TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
-                         TCODConsole::root, 0, 0);
+      blit_map_console ();
       TCODConsole::flush ();
     }
     else {
@@ -231,12 +240,11 @@ int TacticalUI::display () {
     render_grid ();
     clear_objects ();
     render_objects ();
+    blit_map_console ();
 
-    TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
-                       TCODConsole::root, 0, 0);
     render_hud ();
-    TCODConsole::blit (hud_console, 0, 0, hud_console_w, hud_console_h, 
-                       TCODConsole::root, 80, 0);
+    blit_hud_console ();
+
     TCODConsole::flush ();
     
     AbilityInvocation* player_action = handle_keys ();    
