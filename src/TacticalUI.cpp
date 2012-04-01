@@ -212,6 +212,9 @@ AbilityInvocation* TacticalUI::handle_keys () {
     else if (key.vk == TCODK_CHAR && key.c == 'x') {
       // Call function to do targetting.
       targeter ();
+      TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h, 
+                         TCODConsole::root, 0, 0);
+      TCODConsole::flush ();
     }
     else {
       return (new NullInvocation (player->id, zone));
