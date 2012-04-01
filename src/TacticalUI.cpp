@@ -99,7 +99,7 @@ TargetData TacticalUI::targeter () {
 
   TCODConsole* targeter_console = new TCODConsole::TCODConsole (1,1);
   targeter_console->putChar (0, 0, 'X', TCOD_BKGND_NONE);
-  targeter_console->setCharForeground (0, 0, TCODColor::grey);
+  targeter_console->setCharForeground (0, 0, targeter_color);
 
   Coord coord = zone->location_of (player->id);
 

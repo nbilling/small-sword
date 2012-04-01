@@ -15,6 +15,8 @@ using namespace std;
 #define HUD_HP_X 1
 #define HUD_HP_Y 41
 
+#define targeter_color TCODColor::blue
+
 typedef struct {
   TCOD_key_t key;
   Coord coord;
