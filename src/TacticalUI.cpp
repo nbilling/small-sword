@@ -1,9 +1,11 @@
 #include "TacticalUI.hpp"
 
 
-TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, TCODMap* new_player_fov_map, 
-                        TCODConsole* new_map_console, int new_map_console_w, int new_map_console_h, 
-                        TCODConsole* new_hud_console, int new_hud_console_w, int new_hud_console_h) {
+TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, 
+                        TCODMap* new_player_fov_map, TCODConsole* new_map_console, 
+                        int new_map_console_w, int new_map_console_h, 
+                        TCODConsole* new_hud_console, int new_hud_console_w, 
+                        int new_hud_console_h) {
   zone = new_zone;
   ais = new_ais;
   player = new_player;
@@ -14,6 +16,7 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, 
   hud_console = new_hud_console;
   hud_console_w = new_hud_console_w;
   hud_console_h = new_hud_console_h;
+  player_quit = false;
 }
   
 void TacticalUI::render_grid () {
@@ -164,74 +167,64 @@ TargetData TacticalUI::targeter () {
   }
 }
 
-int TacticalUI::handle_keys () {
+AbilityInvocation* TacticalUI::handle_keys () {
   TCOD_key_t key = {TCODK_NONE,0};
   TCOD_mouse_t mouse;
 
-  //    TCOD_key_t key = TCODConsole::waitForKeypress (true);
-  TCODSystem::waitForEvent((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),&key,&mouse, false);
+  while (1) {
+    //    TCOD_key_t key = TCODConsole::waitForKeypress (true);
+    TCODSystem::waitForEvent ((TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE),
+                              &key, &mouse, false);
 
-  if (key.vk == TCODK_ENTER && key.lalt) {
-    TCODConsole::setFullscreen (!TCODConsole::isFullscreen());
-    return (0);
-  } 
-  else if (key.vk == TCODK_ESCAPE) {
-    return (-1);
-  }
-
-  if (game_state == GS_PLAYING) {
-    //Movement keys
-    if (key.vk == TCODK_CHAR && key.c == 'k') {
-      step (player->id, zone, 8);
-      fov_recompute = true;
+    if (key.vk == TCODK_ENTER && key.lalt) {
+      TCODConsole::setFullscreen (!TCODConsole::isFullscreen());
+      continue;
+    } 
+    else if (key.vk == TCODK_ESCAPE) {
+      player_quit = true;
+      return (new NullInvocation (player->id, zone));
+    }
+      //Movement keys
+    else if (key.vk == TCODK_CHAR && key.c == 'k') {
+      return (new StepInvocation (player->id, zone, 8));
     }
     else if (key.vk == TCODK_CHAR && key.c =='j') {
-      step (player->id, zone, 2);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 2));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'h') {
-      step (player->id, zone, 4);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 4));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'l') {
-      step (player->id, zone, 6);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 6));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'y') {
-      step (player->id, zone, 7);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 7));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'u') {
-      step (player->id, zone, 9);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 9));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'b') {
-      step (player->id, zone, 1);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 1));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'n') {
-      step (player->id, zone, 3);
-      fov_recompute = true;
+      return (new StepInvocation (player->id, zone, 3));
     }
     else if (key.vk == TCODK_CHAR && key.c == 'x') {
       // Call function to do targetting.
       targeter ();
     }
-  }    
-  return (0);
+    else {
+      return (new NullInvocation (player->id, zone));
+    }
+  }
 }
   
 int TacticalUI::display () {
-  fov_recompute = true;
-  game_state = GS_PLAYING;
-
   while (!TCODConsole::isWindowClosed ()) {
-    if (fov_recompute) {
-      fov_recompute = false;
-      Coord player_loc = zone->location_of (player->id);
-      player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS, 
-                           FOV_LIGHT_WALLS); 
-    }
+    Coord player_loc = zone->location_of (player->id);
+    player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS, 
+                                FOV_LIGHT_WALLS); 
+
     render_grid ();
     clear_objects ();
     render_objects ();
@@ -243,13 +236,18 @@ int TacticalUI::display () {
                        TCODConsole::root, 80, 0);
     TCODConsole::flush ();
     
-    if (handle_keys () == -1) {
+    AbilityInvocation* player_action = handle_keys ();    
+    if (player_quit) {
       break;
     }
+    player_action->execute ();
+    delete (player_action);
 
     for (list<AI*>::iterator ai = ais->begin ();
-         ai != ais->end (); ai++){
-      (*ai)->take_turn ();
+         ai != ais->end (); ai++) {
+      AbilityInvocation* ai_action = (*ai)->take_turn ();
+      ai_action->execute ();
+      delete (ai_action);
     }    
   }
   return (0);

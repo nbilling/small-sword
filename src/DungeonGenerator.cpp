@@ -60,7 +60,7 @@ void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
                              true, new CSheet(15));
       }
       zone->place_object (monster->id, (Coord){x,y});
-      AI* ai = new AI (monster, (Coord){x,y}, zone);
+      AI* ai = new AI (monster, zone);
       ais->push_back(ai);
     }
   }

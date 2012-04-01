@@ -1,9 +1,7 @@
 #include "AI.hpp"
 #include "iostream"
 
-AI::AI (Object* new_object, const Coord& new_object_loc, 
-        Zone* new_zone) {
-  object_loc = new_object_loc;
+AI::AI (Object* new_object, Zone* new_zone) {
   object = new_object;
   zone = new_zone;
   in_pursuit = false;
@@ -156,39 +154,44 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
   return (best);
 }
 
-void AI::approach (const Coord& target) {
+StepInvocation* AI::approach (const Coord& target) {
   // calculate path_map
   PathMap path_map = dijkstra (object_loc, zone);
 
   // calculate dest from path_map
   Coord dest = closest_dest_to_target (target, path_map);
-  
+  assert (zone->in_bounds (dest));
+
   // calculate first step from path_map and dest
   // move
-  if (zone->in_bounds (dest)) {
-    list<Coord>* path = find_path (object_loc, dest, path_map);
-    if (path->size () > 1) {
-      Coord step_start = path->front ();
-      path->pop_front ();
-      Coord step_end = path->front ();
-      path->pop_front ();
-      int dir = displacement_to_direction 
-                 (step_end.x - step_start.x, 
-                  step_end.y - step_start.y);
-      step (object->id, zone, dir);
-      object_loc = step_end;
-    }
-    delete path;
+  list<Coord>* path = find_path (object_loc, dest, path_map);
+  int dir;
+  if (path->size () > 1) {
+    Coord step_start = path->front ();
+    path->pop_front ();
+    Coord step_end = path->front ();
+    path->pop_front ();
+    dir = displacement_to_direction 
+      (step_end.x - step_start.x, 
+       step_end.y - step_start.y);
   }
+  else
+    dir = 5;
+
+  delete path;
   for (int i=0; i < zone->grid_w; i ++)
     delete path_map.d[i];
   delete path_map.d;
   for (int i=0; i < zone->grid_w; i++)
     delete path_map.p[i];
   delete path_map.p;
+
+  return (new StepInvocation (object->id, zone, dir));
 }
 
-void AI::take_turn () {
+AbilityInvocation* AI::take_turn () {
+  object_loc = zone->location_of (object->id);
+
   if (fov_map == NULL) {
     fov_map = new TCODMap(zone->grid_w, zone->grid_h);
     init_fov_map ();
@@ -208,13 +211,13 @@ void AI::take_turn () {
 
       //move towards player if far away
       if (distance_to (object_loc, o_loc) >= 2) {
-        approach (last_seen);
-        break;
+        delete (visible);
+        return (approach (last_seen));
       }
       //close enough, attack! (if the player is still alive.)
       else if (o->csheet->hp > 0) {
-        attack (object, o);
-        break;
+        delete (visible);
+        return (new AttackInvocation (object->id, zone, o->id));
       }
     }
   }
@@ -222,10 +225,13 @@ void AI::take_turn () {
   if (!player_spotted && in_pursuit) {
     if (coord_eq (object_loc, last_seen))
       in_pursuit = false;
-    else
-      approach (last_seen);
+    else {
+      delete (visible);
+      return (approach (last_seen));
+    }
   }
 
   delete (visible);
+  return (new NullInvocation (object->id, zone));
 }
 

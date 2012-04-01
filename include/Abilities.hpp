@@ -1,37 +1,51 @@
 #ifndef ABILITIES_HPP
 #define ABILITIES_HPP
 
+#include <assert.h>
 #include "Types.hpp"
 #include "Formulas.hpp"
 #include "Object.hpp"
 
-typedef struct {
-  list<Coord>* path;
-} AbilityWalk;
-
-typedef struct {
-  int direction;
-} AbilityStep;
-
-enum AbilityType {
-  AbilityNull,
-  AbilityWalk, 
-  AbilityStep
+class AbilityInvocation {
+protected:
+  int obj_id;
+  Zone* zone;
+public:
+  virtual void execute () {};
 };
 
-typedef struct {
-  enum AbilityType type;
-  union {
-    void null_data;
-    AbilityWalk walk_data;
-    AbilityStep step_data;
-  } ability_data;
-} AbilityInvocation;
+class WalkInvocation : public AbilityInvocation {
+private:
+  list <Coord>* path;
+public:
+  WalkInvocation (int new_obj_id, Zone* new_zone, list<Coord>* new_path);
+  ~WalkInvocation ();
+  void execute ();
+};
 
-void walk (int obj_id, Zone* zone, list<Coord>* path);
+class StepInvocation : public AbilityInvocation {
+private:
+  int direction;
+public:
+  StepInvocation (int new_obj_id, Zone* new_zone, int new_direction);
+  ~StepInvocation ();
+  void execute ();
+};
+    
+class NullInvocation : public AbilityInvocation {
+public:
+  NullInvocation (int new_obj_id, Zone* zone);
+  ~NullInvocation ();
+  void execute ();
+};
 
-void step (int obj_id, Zone* zone, int direction);      
-
-void attack (Object* src_object, Object* dest_object);
+class AttackInvocation : public AbilityInvocation {
+private:
+  int target_obj_id;
+public:
+  AttackInvocation (int new_obj_id, Zone* new_zone, int new_target_obj_id);
+  ~AttackInvocation ();
+  void execute ();
+};
 
 #endif
