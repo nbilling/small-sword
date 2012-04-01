@@ -23,27 +23,27 @@ void TacticalUI::render_grid () {
   //Draw the grid 
   for (int y=0; y < zone->grid_h; y++){
     for (int x=0; x < zone->grid_w; x++){
-      int visible = player_fov_map->isInFov (x, y);
-      int wall = zone->grid[x][y]->block_sight;
-      if (!visible){
+      if (!player_fov_map->isInFov (x, y)){
+        // Not visible
         if (zone->grid[x][y]->explored) {
-          if (wall) {
-            map_console->setCharBackground (x, y, color_dark_wall);
-          }
-          else {
-            map_console->setCharBackground (x, y, color_dark_ground);
-          }
+          // Explored
+          float h, s, v;
+          zone->grid[x][y]->color.getHSV (&h, &s, &v);
+          TCODColor color = TCODColor (h, s * 2, v / 2);
+          map_console->setCharBackground (x, y, color);
+        }
+        else {
+          // Not explored
+          TCODColor color = TCODColor::black;
+          map_console->setCharBackground (x, y, color);
         }
       }
       else {
-        if (wall) {
-          map_console->setCharBackground (x, y, color_light_wall);
-        }
-        else {
-          map_console->setCharBackground (x, y, color_light_ground);
-        }
+        // Visible
+        TCODColor color = zone->grid[x][y]->color;
+        map_console->setCharBackground (x, y, color);
         zone->grid[x][y]->explored = true;
-      }        
+      }
     }
   }
 }

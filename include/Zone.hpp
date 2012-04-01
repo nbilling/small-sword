@@ -7,8 +7,10 @@
 #include "Types.hpp"
 #include "Tile.hpp"
 #include "Object.hpp"
-
 using namespace std;
+
+#define color_wall TCODColor::grey
+#define color_ground TCODColor::desaturatedOrange
 
 class Zone{
 public:

@@ -7,7 +7,8 @@ void create_room (Zone* zone, const Rect* room) {
   //go through the tiles in the rectangle and make them passable
   for (int x=room->x1 + 1; x < room->x2; x++)
     for (int y=room->y1 + 1; y < room->y2; y++){
-      zone->grid[x][y]->c = '.';
+      zone->grid[x][y]->c = ' ';
+      zone->grid[x][y]->color = color_ground;
       zone->grid[x][y]->blocked = false;
       zone->grid[x][y]->block_sight = false;
       zone->blocked[x][y] = false;
@@ -18,7 +19,8 @@ inline
 void create_h_tunnel (Zone* zone, int x1, int x2, int y) {
   //horizontal tunnel. min() and max() are used in case x1>x2
   for (int x = MININT(x1, x2); x < MAXINT(x1, x2) + 1; x++){
-    zone->grid[x][y]->c = '.';
+    zone->grid[x][y]->c = ' ';
+    zone->grid[x][y]->color = color_ground;
     zone->grid[x][y]->blocked = false;
     zone->grid[x][y]->block_sight = false;
     zone->blocked[x][y] = false;
@@ -29,7 +31,8 @@ inline
 void create_v_tunnel (Zone* zone, int y1, int y2, int x) {
   //vertical tunnel 
   for (int  y = MININT(y1, y2); y < MAXINT(y1, y2) + 1; y++) {
-    zone->grid[x][y]->c = '.';
+    zone->grid[x][y]->c = ' ';
+    zone->grid[x][y]->color = color_ground;
     zone->grid[x][y]->blocked = false;
     zone->grid[x][y]->block_sight = false;
     zone->blocked[x][y] = false;

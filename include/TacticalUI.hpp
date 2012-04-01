@@ -12,11 +12,6 @@
 #include <cstddef>
 using namespace std;
 
-#define color_dark_wall TCODColor::darkerGrey
-#define color_light_wall TCODColor::grey
-#define color_dark_ground TCODColor::darkerOrange
-#define color_light_ground TCODColor::desaturatedOrange
-
 #define HUD_HP_X 1
 #define HUD_HP_Y 41
 

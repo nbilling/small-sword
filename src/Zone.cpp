@@ -9,7 +9,7 @@ Zone::Zone (int new_grid_w, int new_grid_h){
   for (int x=0; x < new_grid_w; x++){
     grid[x] = (Tile**) malloc (sizeof (Tile::Tile*) * new_grid_h);
     for (int y=0; y < new_grid_h; y++){
-      grid[x][y] = new Tile::Tile();
+      grid[x][y] = new Tile::Tile(' ', TCODColor::grey, true, true);
     }
   }
   grid_w = new_grid_w;
