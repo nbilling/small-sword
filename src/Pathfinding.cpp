@@ -124,23 +124,23 @@ PathMap dijkstra (const Coord& src, Zone* zone) {
   // Dijkstra's algorithm for pathfinding in small-sword
 
   // Initialise weight heap
-  MinHeap<Node>* u = new MinHeap<Node> (zone->grid_w * zone->grid_h);
-  for (int i=0; i < zone->grid_w; i ++)
-    for (int j=0; j < zone->grid_h; j++)
+  MinHeap<Node>* u = new MinHeap<Node> (zone->width () * zone->height ());
+  for (int i=0; i < zone->width (); i ++)
+    for (int j=0; j < zone->height (); j++)
       u->push (* new Node ((Coord){i,j}, INF));
   
   // Initialise dist array
-  int** d = new int*[zone->grid_w];
-  for (int i=0; i < zone->grid_w; i ++){
-    d[i] = new int[zone->grid_h];
-    for (int j=0; j < zone->grid_h; j++)
+  int** d = new int*[zone->width ()];
+  for (int i=0; i < zone->width (); i ++){
+    d[i] = new int[zone->height ()];
+    for (int j=0; j < zone->height (); j++)
       d[i][j] = INF;
   }
 
   // Initialise prev array
-  Coord** p = new Coord*[zone->grid_w];
-  for (int i=0; i < zone->grid_w; i++)
-    p[i] = new Coord[zone->grid_h];
+  Coord** p = new Coord*[zone->width ()];
+  for (int i=0; i < zone->width (); i++)
+    p[i] = new Coord[zone->height ()];
                
   // Set current xy
   Coord cur = src;
@@ -199,10 +199,10 @@ list<Coord>* pathfind_dijkstra (const Coord& src, const Coord& dest, Zone* zone)
 
   list<Coord>* retval = find_path (src, dest, path_map);
   
-  for (int i=0; i < zone->grid_w; i ++)
+  for (int i=0; i < zone->width (); i ++)
     delete path_map.d[i];
   delete path_map.d;
-  for (int i=0; i < zone->grid_w; i++)
+  for (int i=0; i < zone->width (); i++)
     delete path_map.p[i];
   delete path_map.p;
 

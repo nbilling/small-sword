@@ -36,7 +36,7 @@ private:
 
   bool player_quit;
 
-  void render_grid ();
+  void render_terrain ();
 
   void render_objects ();
 

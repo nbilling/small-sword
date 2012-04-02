@@ -13,7 +13,7 @@ using namespace std;
 #define color_ground TCODColor::desaturatedOrange
 
 class Zone{
-public:
+private:
   // Inhabitants
   map<int,Coord>* object_locations;
 
@@ -27,6 +27,7 @@ public:
   int grid_w;
   int grid_h;
 
+public:
   Zone (int new_grid_w, int new_grid_h);
 
   ~Zone ();
@@ -42,6 +43,27 @@ public:
   list<int>* objects_at (const Coord& loc);
 
   Coord location_of (int object_id);
+
+  int width ();
+
+  int height ();
+
+  void set_tile_char (const Coord& loc, char new_c);
+
+  void set_tile_color (const Coord& loc, TCODColor new_color);
+
+  void set_tile_blocked (const Coord& loc, bool new_blocked);
+
+  void set_tile_block_sight (const Coord& loc, bool new_block_sight);
+  
+  void set_tile_explored (const Coord& loc, bool new_explored);
+
+  TCODColor get_tile_color (const Coord& loc);
+
+  bool get_tile_explored (const Coord& loc);
+
+  TCODMap* new_fov_map ();
+  
 };
 
 #endif

@@ -19,16 +19,16 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player,
   player_quit = false;
 }
   
-void TacticalUI::render_grid () {
+void TacticalUI::render_terrain () {
   //Draw the grid 
-  for (int y=0; y < zone->grid_h; y++){
-    for (int x=0; x < zone->grid_w; x++){
+  for (int y=0; y < zone->height (); y++){
+    for (int x=0; x < zone->width (); x++){
       if (!player_fov_map->isInFov (x, y)){
         // Not visible
-        if (zone->grid[x][y]->explored) {
+        if (zone->get_tile_explored ((Coord){x,y})) {
           // Explored
           float h, s, v;
-          zone->grid[x][y]->color.getHSV (&h, &s, &v);
+          (zone->get_tile_color ((Coord){x,y})).getHSV (&h, &s, &v);
           TCODColor color = TCODColor (h, s * 2, v / 2);
           map_console->setCharBackground (x, y, color);
         }
@@ -40,9 +40,9 @@ void TacticalUI::render_grid () {
       }
       else {
         // Visible
-        TCODColor color = zone->grid[x][y]->color;
+        TCODColor color = zone->get_tile_color ((Coord){x,y});
         map_console->setCharBackground (x, y, color);
-        zone->grid[x][y]->explored = true;
+        zone->set_tile_explored ((Coord){x,y}, true);
       }
     }
   }
@@ -50,8 +50,8 @@ void TacticalUI::render_grid () {
 
 void TacticalUI::render_objects () {
   //Draw all objects on current zone
-  for (int i = 0; i < zone->grid_w; i++) {
-    for (int j = 0; j < zone->grid_h; j++) {
+  for (int i = 0; i < zone->width (); i++) {
+    for (int j = 0; j < zone->height (); j++) {
       //Only show if it's visible to the player        
       if (player_fov_map->isInFov (i,j)) {
         list<int>* temp = zone->objects_at ((Coord){i,j});
@@ -69,8 +69,8 @@ void TacticalUI::render_objects () {
 
 void TacticalUI::clear_objects () {
   //Clear all object characters from map
-  for (int i = 0; i < zone->grid_w; i++) {
-    for (int j = 0; j < zone->grid_h; j++) {
+  for (int i = 0; i < zone->width (); i++) {
+    for (int j = 0; j < zone->height (); j++) {
       map_console->putChar (i, j, ' ', TCOD_BKGND_NONE);
     }
   }
@@ -237,7 +237,7 @@ int TacticalUI::display () {
     player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS, 
                                 FOV_LIGHT_WALLS); 
 
-    render_grid ();
+    render_terrain ();
     clear_objects ();
     render_objects ();
     blit_map_console ();

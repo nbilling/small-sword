@@ -22,15 +22,15 @@ public:
   AbilityInvocation* take_turn ();
 
 private:
-  TCODMap* fov_map;
   Zone* zone;
+  TCODMap* fov_map;
 
   Object* object;
   // This is just used as a global variable in take_turn, it is not kept up-to-date
   // in between take_turn invocations. Cleanup?
   Coord object_loc;
 
-  int in_pursuit;
+  bool in_pursuit;
   Coord last_seen;
 
   void init_fov_map ();

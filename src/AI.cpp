@@ -4,23 +4,15 @@
 AI::AI (Object* new_object, Zone* new_zone) {
   object = new_object;
   zone = new_zone;
+  fov_map = zone->new_fov_map ();
   in_pursuit = false;
   last_seen = (Coord) {0,0};
 }
 
-void AI::init_fov_map () {
-  for (int y=0; y < zone->grid_h; y++) {
-    for (int x=0; x < zone->grid_w; x++) {
-      fov_map->setProperties (x, y, !zone->grid[x][y]->blocked, 
-                              !zone->grid[x][y]->block_sight);
-    }
-  }
-}
-
 map<int,Coord>* AI::visible_objects () {
   map<int,Coord>* retval = new map<int,Coord> ();
-  for (int i = 0; i < zone->grid_w; i ++)
-    for (int j = 0; j < zone->grid_h; j++)
+  for (int i = 0; i < zone->width (); i ++)
+    for (int j = 0; j < zone->height (); j++)
       if (fov_map->isInFov (i,j)) {
         list<int>* temp = zone->objects_at ((Coord){i,j});
         for (list<int>::iterator it = temp->begin ();
@@ -179,10 +171,10 @@ StepInvocation* AI::approach (const Coord& target) {
     dir = 5;
 
   delete path;
-  for (int i=0; i < zone->grid_w; i ++)
+  for (int i=0; i < zone->width (); i ++)
     delete path_map.d[i];
   delete path_map.d;
-  for (int i=0; i < zone->grid_w; i++)
+  for (int i=0; i < zone->width (); i++)
     delete path_map.p[i];
   delete path_map.p;
 
@@ -191,15 +183,10 @@ StepInvocation* AI::approach (const Coord& target) {
 
 AbilityInvocation* AI::take_turn () {
   object_loc = zone->location_of (object->id);
-
-  if (fov_map == NULL) {
-    fov_map = new TCODMap(zone->grid_w, zone->grid_h);
-    init_fov_map ();
-  }
-        
   fov_map->computeFov(object_loc.x, object_loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
   map<int,Coord>* visible = visible_objects ();
-  int player_spotted = false;
+  bool player_spotted = false;
+
   for (map<int,Coord>::iterator it = visible->begin ();
        it != visible->end(); it++) {
     Object* o = Object::get_object_by_id ((*it).first);

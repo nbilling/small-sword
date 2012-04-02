@@ -1,15 +1,13 @@
 #include "Zone.hpp"
 
-using namespace std;
-
 Zone::Zone (int new_grid_w, int new_grid_h){
   object_locations = new map<int,Coord> ();
 
-  grid = (Tile::Tile***) malloc (sizeof (Tile::Tile**) * new_grid_w);
-  for (int x=0; x < new_grid_w; x++){
-    grid[x] = (Tile**) malloc (sizeof (Tile::Tile*) * new_grid_h);
-    for (int y=0; y < new_grid_h; y++){
-      grid[x][y] = new Tile::Tile(' ', TCODColor::grey, true, true);
+  grid = new Tile**[new_grid_w];
+  for (int i=0; i < new_grid_w; i++){
+    grid[i] = new Tile*[new_grid_h];
+    for (int j=0; j < new_grid_h; j++){
+      grid[i][j] = new Tile::Tile(' ', color_wall, true, true);
     }
   }
   grid_w = new_grid_w;
@@ -19,7 +17,7 @@ Zone::Zone (int new_grid_w, int new_grid_h){
   for (int i=0; i < new_grid_w; i++) {
     blocked[i] = new bool[new_grid_h];
     for (int j=0; j < new_grid_h; j++)
-      blocked[i][j] = grid[i][j]->blocked;
+      blocked[i][j] = true;
   }
 }
 
@@ -29,17 +27,12 @@ Zone::~Zone () {
     delete (blocked[i]);
   delete (blocked);
   
-  for (int x=0; x < grid_w; x++) {
-    //Delete all tiles in this row (Tile::Tile*)
-    for (int y=0; y < grid_h; y++){
-      delete (grid[x][y]);
-    }
-    //Delete pointer to this row (Tile::Tile**)
-    free (grid[x]);
+  for (int i=0; i < grid_w; i++) {
+    for (int j=0; j < grid_h; j++)
+      delete (grid[i][j]);
+    delete (grid[i]);
   }
-  //Delete base of row pointers (Tile::Tile***)
-  free (grid);
-  //Delete objects list
+  delete (grid);
 }
 
 // Place object given by object_id at loc. Do nothing if loc is blocked.
@@ -88,3 +81,51 @@ list<int>* Zone::objects_at (const Coord& loc) {
 Coord Zone::location_of (int object_id) {
   return ((*object_locations)[object_id]);
 }
+
+int Zone::width () {
+  return (grid_w);
+}
+
+int Zone::height () {
+  return (grid_h);
+}
+
+void Zone::set_tile_char (const Coord& loc, char new_c) {
+  grid[loc.x][loc.y]->c = new_c;
+}
+
+void Zone::set_tile_color (const Coord& loc, TCODColor new_color) {
+  grid[loc.x][loc.y]->color = new_color;
+}
+
+ void Zone::set_tile_blocked (const Coord& loc, bool new_blocked) {
+   grid[loc.x][loc.y]->blocked = new_blocked;
+   bool object_blocked = ! ((objects_at (loc))->empty ());
+   blocked[loc.x][loc.y] = new_blocked || object_blocked;
+}
+
+void Zone::set_tile_block_sight (const Coord& loc, bool new_blocks_sight) {
+  grid[loc.x][loc.y]->block_sight = new_blocks_sight;
+}
+
+void Zone::set_tile_explored (const Coord& loc, bool new_explored) {
+  grid[loc.x][loc.y]->explored = new_explored;
+}
+
+TCODColor Zone::get_tile_color (const Coord& loc) {
+  return (grid[loc.x][loc.y]->color);
+}
+
+bool Zone::get_tile_explored (const Coord& loc) {
+  return (grid[loc.x][loc.y]->explored);
+}
+
+TCODMap* Zone::new_fov_map () {
+  TCODMap* fov_map = new TCODMap::TCODMap (grid_w, grid_h);
+  for (int i=0; i < grid_w; i++)
+    for (int j=0; j < grid_h; j++) {
+      fov_map->setProperties (i, j, !grid[i][j]->blocked, !grid[i][j]->block_sight);
+    }
+  return fov_map;
+}
+

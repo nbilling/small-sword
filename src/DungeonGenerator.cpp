@@ -7,11 +7,10 @@ void create_room (Zone* zone, const Rect* room) {
   //go through the tiles in the rectangle and make them passable
   for (int x=room->x1 + 1; x < room->x2; x++)
     for (int y=room->y1 + 1; y < room->y2; y++){
-      zone->grid[x][y]->c = ' ';
-      zone->grid[x][y]->color = color_ground;
-      zone->grid[x][y]->blocked = false;
-      zone->grid[x][y]->block_sight = false;
-      zone->blocked[x][y] = false;
+      zone->set_tile_char ((Coord){x,y}, ' ');
+      zone->set_tile_color ((Coord){x,y}, color_ground);
+      zone->set_tile_blocked ((Coord){x,y}, false);
+      zone->set_tile_block_sight ((Coord){x,y}, false);
     }
 }
  
@@ -19,11 +18,10 @@ inline
 void create_h_tunnel (Zone* zone, int x1, int x2, int y) {
   //horizontal tunnel. min() and max() are used in case x1>x2
   for (int x = MININT(x1, x2); x < MAXINT(x1, x2) + 1; x++){
-    zone->grid[x][y]->c = ' ';
-    zone->grid[x][y]->color = color_ground;
-    zone->grid[x][y]->blocked = false;
-    zone->grid[x][y]->block_sight = false;
-    zone->blocked[x][y] = false;
+    zone->set_tile_char ((Coord){x,y}, ' ');
+    zone->set_tile_color ((Coord){x,y}, color_ground);
+    zone->set_tile_blocked ((Coord){x,y}, false);
+    zone->set_tile_block_sight ((Coord){x,y}, false);
   }
 }
  
@@ -31,11 +29,10 @@ inline
 void create_v_tunnel (Zone* zone, int y1, int y2, int x) {
   //vertical tunnel 
   for (int  y = MININT(y1, y2); y < MAXINT(y1, y2) + 1; y++) {
-    zone->grid[x][y]->c = ' ';
-    zone->grid[x][y]->color = color_ground;
-    zone->grid[x][y]->blocked = false;
-    zone->grid[x][y]->block_sight = false;
-    zone->blocked[x][y] = false;
+    zone->set_tile_char ((Coord){x,y}, ' ');
+    zone->set_tile_color ((Coord){x,y}, color_ground);
+    zone->set_tile_blocked ((Coord){x,y}, false);
+    zone->set_tile_block_sight ((Coord){x,y}, false);
   }
 }
 
@@ -77,13 +74,13 @@ void make_grid (Zone* zone, list<AI*>* ais) {
     //Generate Rect with random width, height and position
     int w = rng->getInt(ROOM_MIN_SIZE, ROOM_MAX_SIZE);
     int h = rng->getInt(ROOM_MIN_SIZE, ROOM_MAX_SIZE);
-    int x = rng->getInt(0, zone->grid_w - w - 1);
-    int y = rng->getInt(0, zone->grid_h - h - 1);            
+    int x = rng->getInt(0, zone->width () - w - 1);
+    int y = rng->getInt(0, zone->height () - h - 1);            
     Rect* new_room = new Rect(x, y, w, h);            
 
     //Run through the other rooms and see if they intersect with this one
     bool failed = false;
-    for (list<Rect*>::iterator other_room = rooms->begin(); 
+    for (list<Rect*>::iterator other_room = rooms->begin (); 
          other_room != rooms->end(); other_room++) {
       if (new_room->intersect(*other_room)) {
         failed = true;
@@ -93,8 +90,6 @@ void make_grid (Zone* zone, list<AI*>* ais) {
     if (!failed) {        
       //No intersections so "paint" it to the grid's tiles
       create_room(zone, new_room); 
-      //Add random contents to this room, such as monsters
-      place_objects(zone, ais, new_room); 
       int new_x = new_room->center_x();
       int new_y = new_room->center_y(); 
       if (num_rooms > 0) {
@@ -117,4 +112,9 @@ void make_grid (Zone* zone, list<AI*>* ais) {
       num_rooms += 1;
     }
   }
+  for (list<Rect*>::iterator it=rooms->begin (); it != rooms->end (); it++) {
+    //Add random contents to this room, such as monsters
+    place_objects(zone, ais, *it); 
+  }
+
 }

@@ -63,12 +63,7 @@ int main (int argc, const char** argv) {
   find_empty_tile (zone, player);
 
   cerr << "+ Set up camera fov_map" << endl;
-  TCODMap* fov_map = new TCODMap::TCODMap (GRID_WIDTH, GRID_HEIGHT);
-  for (int y=0; y < GRID_HEIGHT; y++)
-    for (int x=0; x < GRID_WIDTH; x++) {
-      fov_map->setProperties (x, y, !zone->grid[x][y]->blocked, 
-                              !zone->grid[x][y]->block_sight);
-    }
+  TCODMap* fov_map = zone->new_fov_map ();
 
   cerr << "+ Create TacticalUI" << endl;
   TacticalUI* tactical = new TacticalUI (zone, ais, player, fov_map, 
