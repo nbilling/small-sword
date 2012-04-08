@@ -15,6 +15,10 @@ extern OSErr    CPSSetFrontProcess( CPSProcessSerNum *psn);
 void CustomSDLMain()
 {
 	NSAutoreleasePool  *pool = [[NSAutoreleasePool alloc] init];
+    // This next line is necessary to suppress an unused variable warning
+    // for `pool'. Pool is necessary somehow but I don't understand the
+    // reasons.
+    (void) pool;
 	[ NSApplication sharedApplication ];
 	[ NSApp setMainMenu:[[NSMenu alloc] init] ];
 	
