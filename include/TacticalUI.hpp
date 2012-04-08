@@ -12,7 +12,10 @@
 using namespace std;
 
 #define HUD_HP_X 1
-#define HUD_HP_Y 41
+#define HUD_HP_Y 39
+
+#define HUD_TARGET_X 1
+#define HUD_TARGET_Y 34
 
 #define targeter_color TCODColor::blue
 
@@ -33,6 +36,7 @@ private:
   TCODConsole* hud_console;
   int hud_console_w;
   int hud_console_h;
+  Coord target;
 
   bool player_quit;
 
@@ -50,17 +54,20 @@ private:
 
   void blit_hud_console ();
 
+  void move_target (Coord new_target);
+
   TargetData targeter ();
 
   AbilityInvocation* handle_keys ();
- 
+
 public:
-  TacticalUI (Zone* new_zone, list<AI*>* new_ais, Lifeform* new_player, 
-              TCODMap* new_player_fov_map, TCODConsole* new_map_console, 
-              int new_map_console_w, int new_map_console_h, 
-              TCODConsole* new_hud_console, int new_hud_console_w, 
-              int new_hud_console_h);
-  
+  TacticalUI (Zone* new_zone, list<AI*>* new_ais,
+          Lifeform* new_player,
+          int new_map_console_w, int new_map_console_h,
+          int new_hud_console_w, int new_hud_console_h);
+
+  ~TacticalUI ();
+
   int display ();
 };
 

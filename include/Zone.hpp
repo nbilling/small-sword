@@ -55,7 +55,7 @@ public:
   void set_tile_blocked (const Coord& loc, bool new_blocked);
 
   void set_tile_block_sight (const Coord& loc, bool new_block_sight);
-  
+
   void set_tile_explored (const Coord& loc, bool new_explored);
 
   TCODColor get_tile_color (const Coord& loc);
@@ -63,7 +63,7 @@ public:
   bool get_tile_explored (const Coord& loc);
 
   TCODMap* new_fov_map ();
-  
+
 };
 
 #endif

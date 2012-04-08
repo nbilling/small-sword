@@ -40,16 +40,8 @@ int main (int argc, const char** argv) {
           TCOD_FONT_TYPE_GREYSCALE | TCOD_FONT_LAYOUT_TCOD);
   cerr << "+ Init root console" << endl;
   TCODConsole::initRoot (ROOT_CONSOLE_WIDTH, ROOT_CONSOLE_HEIGHT,
-          "python/libtcod tutorial", false);
+          "small-sword", false);
   TCODSystem::setFps (LIMIT_FPS);
-
-  cerr << "+ Create offscreen map console" << endl;
-  TCODConsole* map_console = new TCODConsole::TCODConsole (MAP_CONSOLE_WIDTH,
-          MAP_CONSOLE_HEIGHT);
-
-  cerr << "+ Create offscreen hud console" << endl;
-  TCODConsole* hud_console = new TCODConsole::TCODConsole (HUD_CONSOLE_WIDTH,
-          HUD_CONSOLE_HEIGHT);
 
   cerr << "+ Create zone" << endl;
   Zone* zone = new Zone (GRID_WIDTH, GRID_HEIGHT);
@@ -66,15 +58,10 @@ int main (int argc, const char** argv) {
   cerr << "+ Place player" << endl;
   find_empty_tile (zone, player);
 
-  cerr << "+ Set up camera fov_map" << endl;
-  TCODMap* fov_map = zone->new_fov_map ();
-
   cerr << "+ Create TacticalUI" << endl;
-  TacticalUI* tactical = new TacticalUI (zone, ais, player, fov_map,
-                                         map_console, MAP_CONSOLE_WIDTH,
-                                         MAP_CONSOLE_HEIGHT, hud_console,
-                                         HUD_CONSOLE_WIDTH,
-                                         HUD_CONSOLE_HEIGHT);
+  TacticalUI* tactical = new TacticalUI
+      (zone, ais, player, MAP_CONSOLE_WIDTH, MAP_CONSOLE_HEIGHT,
+       HUD_CONSOLE_WIDTH, HUD_CONSOLE_HEIGHT);
 
   cerr << "+ Initialisation complete" << endl;
 
@@ -84,9 +71,6 @@ int main (int argc, const char** argv) {
 
   delete tactical;
   delete TCODConsole::root;
-  delete map_console;
-  delete hud_console;
-  delete fov_map;
   delete zone;
   Object::delete_registered_objects ();
   cerr << "+ Memory deallocation completed" << endl;
