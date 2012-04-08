@@ -25,7 +25,7 @@ class TacticalUI {
 private:
   Zone* zone;
   list<AI*>* ais;
-  Object* player;
+  Lifeform* player;
   TCODMap* player_fov_map;
   TCODConsole* map_console;
   int map_console_w;
@@ -55,7 +55,7 @@ private:
   AbilityInvocation* handle_keys ();
  
 public:
-  TacticalUI (Zone* new_zone, list<AI*>* new_ais, Object* new_player, 
+  TacticalUI (Zone* new_zone, list<AI*>* new_ais, Lifeform* new_player, 
               TCODMap* new_player_fov_map, TCODConsole* new_map_console, 
               int new_map_console_w, int new_map_console_h, 
               TCODConsole* new_hud_console, int new_hud_console_w, 

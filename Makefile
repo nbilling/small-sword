@@ -42,7 +42,6 @@ $(TEMP)/small-sword/release/src/%.o : $(OSXDIR)/%.m
 OBJS_RELEASE=$(TEMP)/small-sword/release/src/small-sword.o \
 	$(TEMP)/small-sword/release/src/macsupport.o \
 	$(TEMP)/small-sword/release/src/AI.o \
-	$(TEMP)/small-sword/release/src/CSheet.o \
 	$(TEMP)/small-sword/release/src/DungeonGenerator.o \
 	$(TEMP)/small-sword/release/src/Object.o \
 	$(TEMP)/small-sword/release/src/Rect.o \

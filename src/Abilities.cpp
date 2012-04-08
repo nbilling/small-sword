@@ -85,7 +85,7 @@ NullInvocation::NullInvocation (int new_obj_id, Zone* new_zone) {
   obj_id = new_obj_id;
   zone = new_zone;
 }
-  
+
 NullInvocation::~NullInvocation () {}
 
 void NullInvocation::execute () {}
@@ -101,6 +101,6 @@ AttackInvocation::AttackInvocation (int new_obj_id, Zone* new_zone,
 AttackInvocation::~AttackInvocation () {}
 
 void AttackInvocation::execute () {
-  Object* target = Object::get_object_by_id (target_obj_id);
-  target->csheet->hp -=1;
+  Lifeform* target = (Lifeform*) Object::get_object_by_id (target_obj_id);
+  target->set_lifeform_hp (target->get_lifeform_hp () - 1);
 }

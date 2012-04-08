@@ -40,7 +40,6 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
   target_fov_map->copy (fov_map);
   target_fov_map->computeFov (target.x, target.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
   fov_map->computeFov (object_loc.x, object_loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
-  
 
   int ring = 0;
   Coord cur = target;
@@ -178,20 +177,21 @@ StepInvocation* AI::approach (const Coord& target) {
     delete path_map.p[i];
   delete path_map.p;
 
-  return (new StepInvocation (object->id, zone, dir));
+  return (new StepInvocation (object->get_object_id (), zone, dir));
 }
 
 AbilityInvocation* AI::take_turn () {
-  object_loc = zone->location_of (object->id);
-  fov_map->computeFov(object_loc.x, object_loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
+  object_loc = zone->location_of (object->get_object_id ());
+  fov_map->computeFov(object_loc.x, object_loc.y, TORCH_RADIUS,
+          FOV_LIGHT_WALLS);
   map<int,Coord>* visible = visible_objects ();
   bool player_spotted = false;
 
   for (map<int,Coord>::iterator it = visible->begin ();
        it != visible->end(); it++) {
-    Object* o = Object::get_object_by_id ((*it).first);
+    Lifeform* o = (Lifeform*) Object::get_object_by_id ((*it).first);
     Coord o_loc = (*it).second;
-    if (strcmp (o->name, "player") == 0) {
+    if (strcmp (o->get_object_name (), "player") == 0) {
       player_spotted = true;
       in_pursuit = true;
       last_seen = o_loc;
@@ -202,9 +202,10 @@ AbilityInvocation* AI::take_turn () {
         return (approach (last_seen));
       }
       //close enough, attack! (if the player is still alive.)
-      else if (o->csheet->hp > 0) {
+      else if (o->get_lifeform_hp () > 0) {
         delete (visible);
-        return (new AttackInvocation (object->id, zone, o->id));
+        return (new AttackInvocation
+                (object->get_object_id (), zone, o->get_object_id ()));
       }
     }
   }
@@ -219,6 +220,6 @@ AbilityInvocation* AI::take_turn () {
   }
 
   delete (visible);
-  return (new NullInvocation (object->id, zone));
+  return (new NullInvocation (object->get_object_id (), zone));
 }
 

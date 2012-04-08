@@ -11,7 +11,7 @@
 #include "Pathfinding.hpp"
 
 
-#define FOV_ALGO 0  
+#define FOV_ALGO 0
 #define FOV_LIGHT_WALLS true
 #define TORCH_RADIUS 10
 #define INF INT_MAX
