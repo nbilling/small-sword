@@ -12,15 +12,45 @@
 #include "AI.hpp"
 using namespace std;
 
-#define HUD_HP_X 1
-#define HUD_HP_Y 39
+// Map dimensions
+#define MAP_X 0
+#define MAP_Y 0
 
-#define HUD_TARGET_X 1
-#define HUD_TARGET_Y 32
+// HUD and HUD section dimensions
+// Note: HUD_X,HUD_Y is an offset in the root console whereas
+//       HUD_<section>_X/HUD_<section>_Y is an offset in the hud console.
+#define HUD_X 80
+#define HUD_Y 0
+#define HUD_W 20
+#define HUD_H 45
 
-#define HUD_TARGET_DESC_X 1
-#define HUD_TARGET_DESC_Y 33
+#define HUD_MESSAGES_X 0
+#define HUD_MESSAGES_Y 1      // Messages, Target, and Status heights add up to 44
+#define HUD_MESSAGES_W HUD_W  // because Messages starts at (0,1).
+#define HUD_MESSAGES_H 30
 
+#define HUD_TARGET_X 0
+#define HUD_TARGET_Y 31
+#define HUD_TARGET_W HUD_W
+#define HUD_TARGET_H 7
+
+#define HUD_STATUS_X 0
+#define HUD_STATUS_Y 38
+#define HUD_STATUS_W HUD_W
+#define HUD_STATUS_H 7
+
+// Dimensions of fields in Target section.
+#define HUD_TARGET_COORD_X HUD_TARGET_X + 1
+#define HUD_TARGET_COORD_Y HUD_TARGET_Y + 1
+
+#define HUD_TARGET_DESC_X HUD_TARGET_X + 1
+#define HUD_TARGET_DESC_Y HUD_TARGET_Y + 2
+
+// Dimensions of fields in Status section.
+#define HUD_STATUS_HP_X HUD_STATUS_X + 1
+#define HUD_STATUS_HP_Y HUD_STATUS_Y + 1
+
+// HUD color scheme.
 #define targeter_color TCODColor::blue
 
 typedef struct {
@@ -38,8 +68,6 @@ class TacticalUI {
         int map_console_w;
         int map_console_h;
         TCODConsole* hud_console;
-        int hud_console_w;
-        int hud_console_h;
         Coord target;
         char* target_desc;
 
@@ -75,10 +103,7 @@ class TacticalUI {
         AbilityInvocation* handle_keys ();
 
     public:
-        TacticalUI (Zone* new_zone, list<AI*>* new_ais,
-                Lifeform* new_player,
-                int new_map_console_w, int new_map_console_h,
-                int new_hud_console_w, int new_hud_console_h);
+        TacticalUI (Zone* new_zone, list<AI*>* new_ais, Lifeform* new_player);
 
         ~TacticalUI ();
 

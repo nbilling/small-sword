@@ -14,9 +14,6 @@ using namespace std;
 #define MAP_CONSOLE_WIDTH 80
 #define MAP_CONSOLE_HEIGHT 50
 
-#define HUD_CONSOLE_WIDTH 20
-#define HUD_CONSOLE_HEIGHT 50
-
 #define GRID_WIDTH 80
 #define GRID_HEIGHT 45
 
@@ -59,9 +56,7 @@ int main (int argc, const char** argv) {
     find_empty_tile (zone, player);
 
     cerr << "+ Create TacticalUI" << endl;
-    TacticalUI* tactical = new TacticalUI
-        (zone, ais, player, MAP_CONSOLE_WIDTH, MAP_CONSOLE_HEIGHT,
-         HUD_CONSOLE_WIDTH, HUD_CONSOLE_HEIGHT);
+    TacticalUI* tactical = new TacticalUI (zone, ais, player);
 
     cerr << "+ Initialisation complete" << endl;
 

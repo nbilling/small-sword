@@ -1,20 +1,15 @@
 #include "TacticalUI.hpp"
 
 
-TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
-        Lifeform* new_player,
-        int new_map_console_w, int new_map_console_h,
-        int new_hud_console_w, int new_hud_console_h) {
+TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Lifeform* new_player) {
     zone = new_zone;
     ais = new_ais;
     player = new_player;
     player_fov_map = zone->new_fov_map ();
-    map_console_w = new_map_console_w;
-    map_console_h = new_map_console_h;
+    map_console_w = zone->width ();
+    map_console_h = zone->height ();
     map_console = new TCODConsole::TCODConsole (map_console_w, map_console_h);
-    hud_console_w = new_hud_console_w;
-    hud_console_h = new_hud_console_h;
-    hud_console = new TCODConsole::TCODConsole (hud_console_w, hud_console_h);
+    hud_console = new TCODConsole::TCODConsole (HUD_W, HUD_H);
     target = (Coord) {0,0};
     target_desc = new char[1];
     strcpy (target_desc, "");
@@ -89,7 +84,7 @@ void TacticalUI::hud_write (int x, int y, const char* s) {
     //Write string s (horizontally) to the hud at (x,y)
     //Will write to edge of console, dropping rest of string, if s is too long to fit
     //from x to the end of the HUD console
-    for (int i=0; (s[i] != '\0') && (i + x < hud_console_w); i++){
+    for (int i=0; (s[i] != '\0') && (i + x < HUD_W); i++){
         hud_console->setCharForeground (i + x, y, TCODColor::white);
         hud_console->putChar (i + x, y, s[i], TCOD_BKGND_NONE);
     }
@@ -137,33 +132,36 @@ void TacticalUI::render_hud () {
             TCODColor::white);
 
     // Draw Messages
-    hud_console->printFrame (0, 0, hud_console_w, 31, true, TCOD_BKGND_DEFAULT,
-            "%cMESSAGES%c", TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    hud_console->printFrame (HUD_MESSAGES_X, HUD_MESSAGES_Y, HUD_MESSAGES_W,
+            HUD_MESSAGES_H, true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c", TCOD_COLCTRL_1,
+            TCOD_COLCTRL_STOP);
 
     // Draw Target
-    hud_console->printFrame (0, 31, hud_console_w, 7, true, TCOD_BKGND_DEFAULT,
-            "%cTARGET%c", TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    hud_console->printFrame (HUD_TARGET_X, HUD_TARGET_Y, HUD_TARGET_W,
+            HUD_TARGET_H, true, TCOD_BKGND_DEFAULT, "%cTARGET%c", TCOD_COLCTRL_1,
+            TCOD_COLCTRL_STOP);
     char target_loc[7];
     sprintf(target_loc, "(%02i,%02i)", target.x, target.y);
-    hud_write (HUD_TARGET_X, HUD_TARGET_Y, target_loc);
+    hud_write (HUD_TARGET_COORD_X, HUD_TARGET_COORD_Y, target_loc);
     hud_write (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y, target_desc);
 
     // Draw Status
-    hud_console->printFrame (0, 38, hud_console_w, 7, true, TCOD_BKGND_DEFAULT,
-            "%cSTATUS%c", TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    hud_console->printFrame (HUD_STATUS_X, HUD_STATUS_Y, HUD_STATUS_W,
+            HUD_STATUS_H, true, TCOD_BKGND_DEFAULT, "%cSTATUS%c", TCOD_COLCTRL_1,
+            TCOD_COLCTRL_STOP);
     char hp[7];
     sprintf(hp,"HP: %3i",player->get_lifeform_hp ());
-    hud_write (HUD_HP_X, HUD_HP_Y, hp);
+    hud_write (HUD_STATUS_HP_X, HUD_STATUS_HP_Y, hp);
 }
 
 void TacticalUI::blit_map_console () {
     TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h,
-            TCODConsole::root, 0, 0);
+            TCODConsole::root, MAP_X, MAP_Y);
 }
 
 void TacticalUI::blit_hud_console () {
-    TCODConsole::blit (hud_console, 0, 0, hud_console_w, hud_console_h,
-            TCODConsole::root, 80, 1);
+    TCODConsole::blit (hud_console, 0, 0, HUD_W, HUD_H,
+            TCODConsole::root, HUD_X, HUD_Y);
 }
 
 void TacticalUI::move_target (Coord new_target) {
