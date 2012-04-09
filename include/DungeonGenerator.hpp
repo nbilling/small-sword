@@ -18,10 +18,10 @@
 
 inline
 void create_room (Zone* zone, const Rect* room);
- 
+
 inline
 void create_h_tunnel (Zone* zone, int x1, int x2, int y);
- 
+
 inline
 void create_v_tunnel (Zone* zone, int y1, int y2, int x);
 

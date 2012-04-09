@@ -2,21 +2,21 @@
 #define RECT_HPP
 
 class Rect{
-public:
-  int x1;
-  int x2;
-  int y1;
-  int y2;
-    
-  Rect (int x, int y, int w, int h);
+    public:
+        int x1;
+        int x2;
+        int y1;
+        int y2;
 
-  ~Rect ();
-    
-  int center_x ();
+        Rect (int x, int y, int w, int h);
 
-  int center_y ();
+        ~Rect ();
 
-  bool intersect (Rect* other);
+        int center_x ();
+
+        int center_y ();
+
+        bool intersect (Rect* other);
 };
 
 #endif

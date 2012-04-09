@@ -13,56 +13,56 @@ using namespace std;
 #define color_ground TCODColor::desaturatedOrange
 
 class Zone{
-private:
-  // Inhabitants
-  map<int,Coord>* object_locations;
+    private:
+        // Inhabitants
+        map<int,Coord>* object_locations;
 
-  // Bookkeeping
-  bool** blocked;
+        // Bookkeeping
+        bool** blocked;
 
-  // Terrain
-  Tile::Tile*** grid;
+        // Terrain
+        Tile::Tile*** grid;
 
-  // Grid dimensions
-  int grid_w;
-  int grid_h;
+        // Grid dimensions
+        int grid_w;
+        int grid_h;
 
-public:
-  Zone (int new_grid_w, int new_grid_h);
+    public:
+        Zone (int new_grid_w, int new_grid_h);
 
-  ~Zone ();
+        ~Zone ();
 
-  void place_object (int object_id, const Coord& loc);
+        void place_object (int object_id, const Coord& loc);
 
-  void move_object (int object_id, const Coord& loc);
+        void move_object (int object_id, const Coord& loc);
 
-  bool is_blocked (const Coord& loc);
+        bool is_blocked (const Coord& loc);
 
-  bool in_bounds (const Coord& loc);
+        bool in_bounds (const Coord& loc);
 
-  list<int>* objects_at (const Coord& loc);
+        list<int>* objects_at (const Coord& loc);
 
-  Coord location_of (int object_id);
+        Coord location_of (int object_id);
 
-  int width ();
+        int width ();
 
-  int height ();
+        int height ();
 
-  void set_tile_char (const Coord& loc, char new_c);
+        void set_tile_char (const Coord& loc, char new_c);
 
-  void set_tile_color (const Coord& loc, TCODColor new_color);
+        void set_tile_color (const Coord& loc, TCODColor new_color);
 
-  void set_tile_blocked (const Coord& loc, bool new_blocked);
+        void set_tile_blocked (const Coord& loc, bool new_blocked);
 
-  void set_tile_block_sight (const Coord& loc, bool new_block_sight);
+        void set_tile_block_sight (const Coord& loc, bool new_block_sight);
 
-  void set_tile_explored (const Coord& loc, bool new_explored);
+        void set_tile_explored (const Coord& loc, bool new_explored);
 
-  TCODColor get_tile_color (const Coord& loc);
+        TCODColor get_tile_color (const Coord& loc);
 
-  bool get_tile_explored (const Coord& loc);
+        bool get_tile_explored (const Coord& loc);
 
-  TCODMap* new_fov_map ();
+        TCODMap* new_fov_map ();
 
 };
 

@@ -10,8 +10,8 @@
 #include "climits"
 
 typedef struct {
-  int** d;
-  Coord** p;
+    int** d;
+    Coord** p;
 } PathMap;
 
 int pathfind_step_dijkstra (const Coord& src, const Coord& dest, Zone* zone);

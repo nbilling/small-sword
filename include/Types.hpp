@@ -10,12 +10,12 @@ class Rect;
 class CSheet;
 
 typedef struct {
-  int x;
-  int y;
+    int x;
+    int y;
 } Coord;
 
 inline bool coord_eq (const Coord& a, const Coord& b) {
-  return (a.x == b.x && a.y == b.y);
+    return (a.x == b.x && a.y == b.y);
 }
 
 #endif
