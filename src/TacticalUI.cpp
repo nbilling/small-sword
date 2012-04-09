@@ -16,6 +16,8 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
     hud_console_h = new_hud_console_h;
     hud_console = new TCODConsole::TCODConsole (hud_console_w, hud_console_h);
     target = (Coord) {0,0};
+    target_desc = new char[1];
+    strcpy (target_desc, "");
     player_quit = false;
 }
 
@@ -23,10 +25,11 @@ TacticalUI::~TacticalUI () {
     delete (player_fov_map);
     delete (map_console);
     delete (hud_console);
+    delete (target_desc);
 }
 
 void TacticalUI::render_terrain () {
-    //Draw the grid 
+    //Draw the grid
     for (int y=0; y < zone->height (); y++){
         for (int x=0; x < zone->width (); x++){
             if (!player_fov_map->isInFov (x, y)){
@@ -143,6 +146,7 @@ void TacticalUI::render_hud () {
     char target_loc[7];
     sprintf(target_loc, "(%02i,%02i)", target.x, target.y);
     hud_write (HUD_TARGET_X, HUD_TARGET_Y, target_loc);
+    hud_write (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y, target_desc);
 
     // Draw Status
     hud_console->printFrame (0, 38, hud_console_w, 7, true, TCOD_BKGND_DEFAULT,
@@ -164,6 +168,17 @@ void TacticalUI::blit_hud_console () {
 
 void TacticalUI::move_target (Coord new_target) {
     if (zone->in_bounds (new_target)) {target = new_target;};
+    list<int>* object_ids = zone->objects_at (target);
+    delete (target_desc);
+    if (!object_ids->empty ()) {
+        Object* o = Object::get_object_by_id (object_ids->front ());
+        target_desc = new char[strlen (o->get_object_name ())];
+        strcpy (target_desc, o->get_object_name ());
+    }
+    else {
+        target_desc = new char[1];
+        strcpy (target_desc, "");
+    }
 }
 
 TargetData TacticalUI::targeter () {

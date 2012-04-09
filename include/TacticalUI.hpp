@@ -18,6 +18,9 @@ using namespace std;
 #define HUD_TARGET_X 1
 #define HUD_TARGET_Y 32
 
+#define HUD_TARGET_DESC_X 1
+#define HUD_TARGET_DESC_Y 33
+
 #define targeter_color TCODColor::blue
 
 typedef struct {
@@ -38,6 +41,7 @@ class TacticalUI {
         int hud_console_w;
         int hud_console_h;
         Coord target;
+        char* target_desc;
 
         bool player_quit;
 
