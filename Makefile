@@ -4,7 +4,6 @@
 SRCDIR=src
 INCDIR=include
 OSXDIR=osx
-# CFLAGS=$(FLAGS) -I$(INCDIR) -I$(SRCDIR) -Wall
 CC=gcc
 CPP=g++
 TEMP=/tmp
@@ -31,13 +30,13 @@ TCOD_DIR=dependencies/libtcod
 TCOD_FLAGS=-I $(TCOD_DIR)/include -I $(TCOD_DIR)/include/gui
 TCOD_LIBS=$(TCOD_DIR)/libtcod.a $(TCOD_DIR)/libtcodxx.a
 
-CFLAGS=$(FLAGS) -I$(INCDIR) -Wall $(TCOD_FLAGS) $(SDL_FLAGS) $(ZLIB_FLAGS) $(PNG_FLAGS) -fno-strict-aliasing -m32 -g
+CFLAGS=$(FLAGS) -I$(INCDIR) -Wall -O0 $(TCOD_FLAGS) $(SDL_FLAGS) $(ZLIB_FLAGS) $(PNG_FLAGS) -fno-strict-aliasing -m32 -g
 
 
 $(TEMP)/small-sword/release/src/%.o : $(SRCDIR)/%.cpp
-	$(CPP) $(CFLAGS) -O2 -s -o $@ -c $< 
+	$(CPP) $(CFLAGS) -s -o $@ -c $<
 $(TEMP)/small-sword/release/src/%.o : $(OSXDIR)/%.m
-	$(CC) $(CFLAGS) -O2 -s -o $@ -c $<
+	$(CC) $(CFLAGS) -s -o $@ -c $<
 
 OBJS_RELEASE=$(TEMP)/small-sword/release/src/small-sword.o \
 	$(TEMP)/small-sword/release/src/macsupport.o \
@@ -50,7 +49,7 @@ OBJS_RELEASE=$(TEMP)/small-sword/release/src/small-sword.o \
 	$(TEMP)/small-sword/release/src/TacticalUI.o \
 	$(TEMP)/small-sword/release/src/Tile.o \
 	$(TEMP)/small-sword/release/src/Zone.o \
-	$(TEMP)/small-sword/release/src/Pathfinding.o 
+	$(TEMP)/small-sword/release/src/Pathfinding.o
 
 
 all : release
