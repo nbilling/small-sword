@@ -18,7 +18,6 @@ class Object {
         char* name;
         TCODColor color;
         bool blocks;
-        CSheet* csheet;
 
         static int next_id;
         static list<int>* recycled_ids;
