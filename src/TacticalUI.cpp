@@ -1,7 +1,8 @@
 #include "TacticalUI.hpp"
 
 
-TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Lifeform* new_player) {
+TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
+        Lifeform* new_player) {
     zone = new_zone;
     ais = new_ais;
     player = new_player;
@@ -9,18 +10,25 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais, Lifeform* new_player
     map_console_w = zone->width ();
     map_console_h = zone->height ();
     map_console = new TCODConsole::TCODConsole (map_console_w, map_console_h);
-    hud_console = new TCODConsole::TCODConsole (HUD_W, HUD_H);
+    hud_messages_console = new TCODConsole::TCODConsole (HUD_MESSAGES_W,
+            HUD_MESSAGES_H);
+    hud_target_console = new TCODConsole::TCODConsole (HUD_TARGET_W,
+            HUD_TARGET_H);
+    hud_status_console = new TCODConsole::TCODConsole (HUD_STATUS_W,
+            HUD_STATUS_H);
     target = (Coord) {0,0};
-    target_desc = new char[1];
-    strcpy (target_desc, "");
+    target_name = new char[1];
+    strcpy (target_name, "");
     player_quit = false;
 }
 
 TacticalUI::~TacticalUI () {
     delete (player_fov_map);
     delete (map_console);
-    delete (hud_console);
-    delete (target_desc);
+    delete (hud_messages_console);
+    delete (hud_target_console);
+    delete (hud_status_console);
+    delete (target_name);
 }
 
 void TacticalUI::render_terrain () {
@@ -62,8 +70,10 @@ void TacticalUI::render_objects () {
                 if (!temp->empty ()) {
                     Object* o = Object::get_object_by_id (temp->front ());
                     //Set the color and then draw the character for this object
-                    map_console->putChar (i, j, o->get_object_char (), TCOD_BKGND_NONE);
-                    map_console->setCharForeground (i, j, o->get_object_color ());
+                    map_console->putChar (i, j, o->get_object_char (),
+                            TCOD_BKGND_NONE);
+                    map_console->setCharForeground (i, j,
+                            o->get_object_color ());
                 }
                 delete (temp);
             }
@@ -77,16 +87,6 @@ void TacticalUI::clear_objects () {
         for (int j = 0; j < zone->height (); j++) {
             map_console->putChar (i, j, ' ', TCOD_BKGND_NONE);
         }
-    }
-}
-
-void TacticalUI::hud_write (int x, int y, const char* s) {
-    //Write string s (horizontally) to the hud at (x,y)
-    //Will write to edge of console, dropping rest of string, if s is too long to fit
-    //from x to the end of the HUD console
-    for (int i=0; (s[i] != '\0') && (i + x < HUD_W); i++){
-        hud_console->setCharForeground (i + x, y, TCODColor::white);
-        hud_console->putChar (i + x, y, s[i], TCOD_BKGND_NONE);
     }
 }
 
@@ -121,8 +121,8 @@ void TacticalUI::draw_bkgnd_frame (int x, int y, int w, int h, TCODColor color,
     sprintf (temp, "%%c%s%%c", str);
     TCODConsole::setColorControl (TCOD_COLCTRL_1,
             TCODColor::black + TCODColor::darkerGrey, TCODColor::lightGrey);
-    console->printEx ((x + w) / 2 - 1, y, TCOD_BKGND_SCREEN, TCOD_CENTER, temp, TCOD_COLCTRL_1,
-            TCOD_COLCTRL_STOP);
+    console->printEx ((x + w) / 2 - 1, y, TCOD_BKGND_SCREEN, TCOD_CENTER, temp,
+            TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
     delete (temp);
 }
 
@@ -130,28 +130,40 @@ void TacticalUI::render_hud () {
     // Set up color control code for HUD section labels (black on white)
     TCODConsole::setColorControl (TCOD_COLCTRL_1, TCODColor::darkerGrey,
             TCODColor::white);
+    // Set up color control code for HUD section text (white on black)
+    TCODConsole::setColorControl (TCOD_COLCTRL_2, TCODColor::white,
+            TCODColor::black);
 
     // Draw Messages
-    hud_console->printFrame (HUD_MESSAGES_X, HUD_MESSAGES_Y, HUD_MESSAGES_W,
-            HUD_MESSAGES_H, true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c", TCOD_COLCTRL_1,
+    hud_messages_console->printFrame (0, 0, HUD_MESSAGES_W, HUD_MESSAGES_H,
+            true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c", TCOD_COLCTRL_1,
             TCOD_COLCTRL_STOP);
 
     // Draw Target
-    hud_console->printFrame (HUD_TARGET_X, HUD_TARGET_Y, HUD_TARGET_W,
-            HUD_TARGET_H, true, TCOD_BKGND_DEFAULT, "%cTARGET%c", TCOD_COLCTRL_1,
+    hud_target_console->printFrame (0, 0, HUD_TARGET_W, HUD_TARGET_H, true,
+            TCOD_BKGND_DEFAULT, "%cTARGET%c", TCOD_COLCTRL_1,
             TCOD_COLCTRL_STOP);
-    char target_loc[7];
-    sprintf(target_loc, "(%02i,%02i)", target.x, target.y);
-    hud_write (HUD_TARGET_COORD_X, HUD_TARGET_COORD_Y, target_loc);
-    hud_write (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y, target_desc);
+    char target_loc[12];
+    char target_desc[5 + strlen (target_name)];
+    sprintf (target_loc, "%%c(%02i,%02i)%%c", target.x, target.y);
+    sprintf (target_desc, "%%c%s%%c", target_name);
+    hud_target_console->printEx (HUD_TARGET_COORD_X, HUD_TARGET_COORD_Y,
+            TCOD_BKGND_NONE, TCOD_LEFT, target_loc, TCOD_COLCTRL_2,
+            TCOD_COLCTRL_STOP);
+    hud_target_console->printEx (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y,
+            TCOD_BKGND_NONE, TCOD_LEFT, target_desc, TCOD_COLCTRL_2,
+            TCOD_COLCTRL_STOP);
 
     // Draw Status
-    hud_console->printFrame (HUD_STATUS_X, HUD_STATUS_Y, HUD_STATUS_W,
-            HUD_STATUS_H, true, TCOD_BKGND_DEFAULT, "%cSTATUS%c", TCOD_COLCTRL_1,
+    hud_status_console->printFrame (0, 0, HUD_STATUS_W, HUD_STATUS_H, true,
+            TCOD_BKGND_DEFAULT, "%cSTATUS%c", TCOD_COLCTRL_1,
             TCOD_COLCTRL_STOP);
     char hp[7];
-    sprintf(hp,"HP: %3i",player->get_lifeform_hp ());
-    hud_write (HUD_STATUS_HP_X, HUD_STATUS_HP_Y, hp);
+    sprintf(hp,"%%cHP: %3i%%c",player->get_lifeform_hp ());
+    hud_target_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
+            TCOD_BKGND_NONE, TCOD_LEFT, hp, TCOD_COLCTRL_2,
+            TCOD_COLCTRL_STOP);
+    (void) hp;
 }
 
 void TacticalUI::blit_map_console () {
@@ -160,22 +172,27 @@ void TacticalUI::blit_map_console () {
 }
 
 void TacticalUI::blit_hud_console () {
-    TCODConsole::blit (hud_console, 0, 0, HUD_W, HUD_H,
-            TCODConsole::root, HUD_X, HUD_Y);
+    TCODConsole::blit (hud_messages_console, 0, 0, HUD_MESSAGES_W,
+            HUD_MESSAGES_H, TCODConsole::root, HUD_X + HUD_MESSAGES_X,
+            HUD_Y + HUD_MESSAGES_Y);
+    TCODConsole::blit (hud_target_console, 0, 0, HUD_TARGET_W, HUD_TARGET_H,
+            TCODConsole::root, HUD_X + HUD_TARGET_X, HUD_Y + HUD_TARGET_Y);
+    TCODConsole::blit (hud_status_console, 0, 0, HUD_STATUS_W, HUD_STATUS_H,
+            TCODConsole::root, HUD_X + HUD_STATUS_X, HUD_Y + HUD_STATUS_Y);
 }
 
 void TacticalUI::move_target (Coord new_target) {
     if (zone->in_bounds (new_target)) {target = new_target;};
     list<int>* object_ids = zone->objects_at (target);
-    delete (target_desc);
+    delete (target_name);
     if (!object_ids->empty ()) {
         Object* o = Object::get_object_by_id (object_ids->front ());
-        target_desc = new char[strlen (o->get_object_name ())];
-        strcpy (target_desc, o->get_object_name ());
+        target_name = new char[strlen (o->get_object_name ())];
+        strcpy (target_name, o->get_object_name ());
     }
     else {
-        target_desc = new char[1];
-        strcpy (target_desc, "");
+        target_name = new char[1];
+        strcpy (target_name, "");
     }
 }
 
@@ -193,7 +210,8 @@ TargetData TacticalUI::targeter () {
         blit_map_console ();
         render_hud ();
         blit_hud_console ();
-        TCODColor target_bk = map_console->getCharBackground (target.x, target.y);
+        TCODColor target_bk = map_console->getCharBackground (target.x,
+                target.y);
         targeter_console->setCharBackground (0, 0, target_bk);
         TCODConsole::blit (targeter_console, 0, 0, 1, 1, TCODConsole::root,
                 target.x, target.y);
