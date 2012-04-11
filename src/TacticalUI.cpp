@@ -70,10 +70,10 @@ void TacticalUI::render_objects () {
                 if (!temp->empty ()) {
                     Object* o = Object::get_object_by_id (temp->front ());
                     //Set the color and then draw the character for this object
-                    map_console->putChar (i, j, o->get_object_char (),
+                    map_console->putChar (i, j, o->get_char (),
                             TCOD_BKGND_NONE);
                     map_console->setCharForeground (i, j,
-                            o->get_object_color ());
+                            o->get_color ());
                 }
                 delete (temp);
             }
@@ -159,7 +159,7 @@ void TacticalUI::render_hud () {
             TCOD_BKGND_DEFAULT, "%cSTATUS%c", TCOD_COLCTRL_1,
             TCOD_COLCTRL_STOP);
     char hp[7];
-    sprintf(hp,"%%cHP: %3i%%c",player->get_lifeform_hp ());
+    sprintf(hp,"%%cHP: %3i%%c",player->get_hp ());
     hud_target_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
             TCOD_BKGND_NONE, TCOD_LEFT, hp, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
@@ -187,8 +187,8 @@ void TacticalUI::move_target (Coord new_target) {
     delete (target_name);
     if (!object_ids->empty ()) {
         Object* o = Object::get_object_by_id (object_ids->front ());
-        target_name = new char[strlen (o->get_object_name ())];
-        strcpy (target_name, o->get_object_name ());
+        target_name = new char[strlen (o->get_name ())];
+        strcpy (target_name, o->get_name ());
     }
     else {
         target_name = new char[1];
@@ -204,7 +204,7 @@ TargetData TacticalUI::targeter () {
     targeter_console->putChar (0, 0, 'X', TCOD_BKGND_NONE);
     targeter_console->setCharForeground (0, 0, targeter_color);
 
-    target = zone->location_of (player->get_object_id ());
+    target = zone->location_of (player->get_id ());
 
     while (1) {
         blit_map_console ();
@@ -286,32 +286,32 @@ AbilityInvocation* TacticalUI::handle_keys () {
         }
         else if (key.vk == TCODK_ESCAPE) {
             player_quit = true;
-            return (new NullInvocation (player->get_object_id (), zone));
+            return (new NullInvocation (player->get_id (), zone));
         }
         //Movement keys
         else if (key.vk == TCODK_CHAR && key.c == 'k') {
-            return (new StepInvocation (player->get_object_id (), zone, 8));
+            return (new StepInvocation (player->get_id (), zone, 8));
         }
         else if (key.vk == TCODK_CHAR && key.c =='j') {
-            return (new StepInvocation (player->get_object_id (), zone, 2));
+            return (new StepInvocation (player->get_id (), zone, 2));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'h') {
-            return (new StepInvocation (player->get_object_id (), zone, 4));
+            return (new StepInvocation (player->get_id (), zone, 4));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'l') {
-            return (new StepInvocation (player->get_object_id (), zone, 6));
+            return (new StepInvocation (player->get_id (), zone, 6));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'y') {
-            return (new StepInvocation (player->get_object_id (), zone, 7));
+            return (new StepInvocation (player->get_id (), zone, 7));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'u') {
-            return (new StepInvocation (player->get_object_id (), zone, 9));
+            return (new StepInvocation (player->get_id (), zone, 9));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'b') {
-            return (new StepInvocation (player->get_object_id (), zone, 1));
+            return (new StepInvocation (player->get_id (), zone, 1));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'n') {
-            return (new StepInvocation (player->get_object_id (), zone, 3));
+            return (new StepInvocation (player->get_id (), zone, 3));
         }
         else if (key.vk == TCODK_CHAR && key.c == 'x') {
             // Call function to do targetting.
@@ -320,14 +320,14 @@ AbilityInvocation* TacticalUI::handle_keys () {
             TCODConsole::flush ();
         }
         else {
-            return (new NullInvocation (player->get_object_id (), zone));
+            return (new NullInvocation (player->get_id (), zone));
         }
     }
 }
 
 int TacticalUI::display () {
     while (!TCODConsole::isWindowClosed ()) {
-        Coord player_loc = zone->location_of (player->get_object_id ());
+        Coord player_loc = zone->location_of (player->get_id ());
         player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS,
                 FOV_LIGHT_WALLS);
 

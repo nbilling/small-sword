@@ -25,7 +25,7 @@ void find_empty_tile (Zone* zone, Object* player) {
     for (int x=0; x < GRID_WIDTH; x++) {
         for (int y=0; y< GRID_HEIGHT; y++) {
             if (!zone->is_blocked ((Coord){x, y})) {
-                zone->place_object(player->get_object_id (), (Coord){x, y});
+                zone->place_object(player->get_id (), (Coord){x, y});
                 return;
             }
         }

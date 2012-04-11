@@ -59,7 +59,7 @@ void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
                 monster = new Lifeform ('T', "troll", TCODColor::sea,
                         true, 15);
             }
-            zone->place_object (monster->get_object_id (), (Coord){x,y});
+            zone->place_object (monster->get_id (), (Coord){x,y});
             AI* ai = new AI (monster, zone);
             ais->push_back(ai);
         }

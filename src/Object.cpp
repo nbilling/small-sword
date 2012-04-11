@@ -43,25 +43,25 @@ Object* Object::get_object_by_id (int target_id) {
     return ((*object_registry)[target_id]);
 }
 
-int Object::get_object_id () {
+int Object::get_id () {
     return (id);
 }
 
-char Object::get_object_char () {
+char Object::get_char () {
     return (c);
 }
 
-char* Object::get_object_name () {
+char* Object::get_name () {
     char* temp = new char[strlen (name)];
     strcpy (temp, name);
     return (temp);
 }
 
-TCODColor Object::get_object_color () {
+TCODColor Object::get_color () {
     return (color);
 }
 
-bool Object::get_object_blocks () {
+bool Object::get_blocks () {
     return (blocks);
 }
 
@@ -82,18 +82,18 @@ Lifeform::~Lifeform () {
     recycle_id ();
     delete (name);
 }
-int Lifeform::get_max_lifeform_hp () {
+int Lifeform::get_max_hp () {
     return (max_hp);
 }
 
-int Lifeform::get_lifeform_hp () {
+int Lifeform::get_hp () {
     return (hp);
 }
 
-void Lifeform::set_lifeform_max_hp (int new_max_hp) {
+void Lifeform::set_max_hp (int new_max_hp) {
     max_hp = new_max_hp;
 }
 
-void Lifeform::set_lifeform_hp (int new_hp) {
+void Lifeform::set_hp (int new_hp) {
     hp = new_hp;
 }

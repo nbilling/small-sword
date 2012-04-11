@@ -43,7 +43,8 @@ class AttackInvocation : public AbilityInvocation {
     private:
         int target_obj_id;
     public:
-        AttackInvocation (int new_obj_id, Zone* new_zone, int new_target_obj_id);
+        AttackInvocation (int new_obj_id, Zone* new_zone,
+                int new_target_obj_id);
         ~AttackInvocation ();
         void execute ();
 };

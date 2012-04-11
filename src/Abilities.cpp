@@ -102,5 +102,5 @@ AttackInvocation::~AttackInvocation () {}
 
 void AttackInvocation::execute () {
     Lifeform* target = (Lifeform*) Object::get_object_by_id (target_obj_id);
-    target->set_lifeform_hp (target->get_lifeform_hp () - 1);
+    target->set_hp (target->get_hp () - 1);
 }

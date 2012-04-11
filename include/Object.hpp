@@ -34,15 +34,15 @@ class Object {
 
         static Object* get_object_by_id (int target_id);
 
-        int get_object_id ();
+        int get_id ();
 
-        char get_object_char ();
+        char get_char ();
 
-        char* get_object_name ();
+        char* get_name ();
 
-        TCODColor get_object_color ();
+        TCODColor get_color ();
 
-        bool get_object_blocks ();
+        bool get_blocks ();
 };
 
 class Lifeform : public Object {
@@ -56,13 +56,13 @@ class Lifeform : public Object {
 
         ~Lifeform ();
 
-        int get_max_lifeform_hp ();
+        int get_max_hp ();
 
-        int get_lifeform_hp ();
+        int get_hp ();
 
-        void set_lifeform_max_hp (int new_max_hp);
+        void set_max_hp (int new_max_hp);
 
-        void set_lifeform_hp (int new_hp);
+        void set_hp (int new_hp);
 };
 
 #endif

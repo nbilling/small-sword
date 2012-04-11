@@ -43,7 +43,7 @@ void Zone::place_object (int object_id,  const Coord& loc) {
         return;
     (*object_locations)[object_id] = loc;
     blocked[loc.x][loc.y] = grid[loc.x][loc.y]->blocked
-        || (Object::get_object_by_id (object_id))->get_object_blocks ();
+        || (Object::get_object_by_id (object_id))->get_blocks ();
 }
 
 // Move object given by object_id to loc. Do nothing if loc is blocked.
@@ -56,7 +56,7 @@ void Zone::move_object (int object_id,  const Coord& loc) {
     blocked[old_loc.x][old_loc.y] = grid[old_loc.x][old_loc.y]->blocked;
     (*object_locations)[object_id] = loc;
     blocked[loc.x][loc.y] = grid[loc.x][loc.y]->blocked
-        || (Object::get_object_by_id (object_id))->get_object_blocks ();
+        || (Object::get_object_by_id (object_id))->get_blocks ();
 }
 
 bool Zone::is_blocked (const Coord& loc) {
@@ -124,8 +124,8 @@ TCODMap* Zone::new_fov_map () {
     TCODMap* fov_map = new TCODMap::TCODMap (grid_w, grid_h);
     for (int i=0; i < grid_w; i++)
         for (int j=0; j < grid_h; j++) {
-            fov_map->setProperties (i, j, !grid[i][j]->blocked, !grid[i][j]->block_sight);
+            fov_map->setProperties (i, j, !grid[i][j]->blocked,
+                    !grid[i][j]->block_sight);
         }
     return fov_map;
 }
-

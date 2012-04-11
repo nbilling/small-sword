@@ -38,8 +38,10 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
 
     TCODMap* target_fov_map = new TCODMap (80,45);
     target_fov_map->copy (fov_map);
-    target_fov_map->computeFov (target.x, target.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
-    fov_map->computeFov (object_loc.x, object_loc.y, TORCH_RADIUS, FOV_LIGHT_WALLS);
+    target_fov_map->computeFov (target.x, target.y, TORCH_RADIUS,
+            FOV_LIGHT_WALLS);
+    fov_map->computeFov (object_loc.x, object_loc.y, TORCH_RADIUS,
+            FOV_LIGHT_WALLS);
 
     int ring = 0;
     Coord cur = target;
@@ -74,7 +76,8 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
                 if (path_in_fov (cur_path, fov_map, target_fov_map)) {
                     int cur_to_src = path_map.d[cur.x][cur.y];
                     int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+                    if (cur_to_target <= best_to_target
+                            && cur_to_src < best_to_src) {
                         best_to_src = cur_to_src;
                         best_to_target = cur_to_target;
                         best = cur;
@@ -92,7 +95,8 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
                 if (path_in_fov (cur_path, fov_map, target_fov_map)) {
                     int cur_to_src = path_map.d[cur.x][cur.y];
                     int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+                    if (cur_to_target <= best_to_target
+                            && cur_to_src < best_to_src) {
                         best_to_src = cur_to_src;
                         best_to_target = cur_to_target;
                         best = cur;
@@ -110,7 +114,8 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
                 if (path_in_fov (cur_path, fov_map, target_fov_map)) {
                     int cur_to_src = path_map.d[cur.x][cur.y];
                     int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+                    if (cur_to_target <= best_to_target
+                            && cur_to_src < best_to_src) {
                         best_to_src = cur_to_src;
                         best_to_target = cur_to_target;
                         best = cur;
@@ -127,7 +132,8 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
                 if (path_in_fov (cur_path, fov_map, target_fov_map)) {
                     int cur_to_src = path_map.d[cur.x][cur.y];
                     int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
+                    if (cur_to_target <= best_to_target
+                            && cur_to_src < best_to_src) {
                         best_to_src = cur_to_src;
                         best_to_target = cur_to_target;
                         best = cur;
@@ -177,11 +183,11 @@ StepInvocation* AI::approach (const Coord& target) {
         delete path_map.p[i];
     delete path_map.p;
 
-    return (new StepInvocation (object->get_object_id (), zone, dir));
+    return (new StepInvocation (object->get_id (), zone, dir));
 }
 
 AbilityInvocation* AI::take_turn () {
-    object_loc = zone->location_of (object->get_object_id ());
+    object_loc = zone->location_of (object->get_id ());
     fov_map->computeFov(object_loc.x, object_loc.y, TORCH_RADIUS,
             FOV_LIGHT_WALLS);
     map<int,Coord>* visible = visible_objects ();
@@ -191,7 +197,7 @@ AbilityInvocation* AI::take_turn () {
             it != visible->end(); it++) {
         Lifeform* o = (Lifeform*) Object::get_object_by_id ((*it).first);
         Coord o_loc = (*it).second;
-        if (strcmp (o->get_object_name (), "player") == 0) {
+        if (strcmp (o->get_name (), "player") == 0) {
             player_spotted = true;
             in_pursuit = true;
             last_seen = o_loc;
@@ -202,10 +208,10 @@ AbilityInvocation* AI::take_turn () {
                 return (approach (last_seen));
             }
             //close enough, attack! (if the player is still alive.)
-            else if (o->get_lifeform_hp () > 0) {
+            else if (o->get_hp () > 0) {
                 delete (visible);
                 return (new AttackInvocation
-                        (object->get_object_id (), zone, o->get_object_id ()));
+                        (object->get_id (), zone, o->get_id ()));
             }
         }
     }
@@ -220,6 +226,6 @@ AbilityInvocation* AI::take_turn () {
     }
 
     delete (visible);
-    return (new NullInvocation (object->get_object_id (), zone));
+    return (new NullInvocation (object->get_id (), zone));
 }
 
