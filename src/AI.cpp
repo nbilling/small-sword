@@ -43,41 +43,26 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
     fov_map->computeFov (object_loc.x, object_loc.y, TORCH_RADIUS,
             FOV_LIGHT_WALLS);
 
-    int ring = 0;
-    Coord cur = target;
-    Coord best = (Coord){-1,-1};
-    int best_to_src = INF;
-    int best_to_target = INF;
+    Coord best = object_loc;
+    int best_to_src = path_map.d[object_loc.x][object_loc.y];
+    int best_to_target = distance_to (object_loc, target);
 
-    // Process center of spiral first
-    if (zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-        list<Coord>* cur_path = find_path (object_loc, cur, path_map);
-        if (path_in_fov (cur_path, fov_map, target_fov_map)) {
-            int cur_to_src = path_map.d[cur.x][cur.y];
-            int cur_to_target = distance_to (cur, target);
-            if (cur_to_target <= best_to_target && cur_to_src < best_to_src) {
-                best_to_src = cur_to_src;
-                best_to_target = cur_to_target;
-                best = cur;
-            }
-        }
-        delete (cur_path);
-    }
-
-
-    // Move outwards in a spiral from target (iterating through rings)
-    while (ring < TORCH_RADIUS) {
-
-        // Rightwards segment of spiral ring
-        for (int i=1; i <= 2*ring + 1 ; i++) {
-            cur.x += 1;
-            if (zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
+    for (int i = max (0, target.x - TORCH_RADIUS);
+            i < min (zone->width (), target.x + TORCH_RADIUS);
+            i++)
+        for (int j = max (0, target.y - TORCH_RADIUS);
+                j < min (zone->height (), target.y + TORCH_RADIUS);
+                j++) {
+            Coord cur = (Coord) {i,j};
+            if ((path_map.d[cur.x][cur.y] != INF)
+                    && fov_map->isInFov (cur.x, cur.y)) {
                 list<Coord>* cur_path = find_path (object_loc, cur, path_map);
                 if (path_in_fov (cur_path, fov_map, target_fov_map)) {
                     int cur_to_src = path_map.d[cur.x][cur.y];
                     int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target
-                            && cur_to_src < best_to_src) {
+                    if (cur_to_target < best_to_target
+                            || (cur_to_target == best_to_target
+                                && cur_to_src < best_to_src)) {
                         best_to_src = cur_to_src;
                         best_to_target = cur_to_target;
                         best = cur;
@@ -86,68 +71,8 @@ Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) 
                 delete (cur_path);
             }
         }
-
-        // Upwards segment of spiral ring
-        for (int i=1; i <= 2*ring + 1 ; i++) {
-            cur.y += 1;
-            if (zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-                list<Coord>* cur_path = find_path (object_loc, cur, path_map);
-                if (path_in_fov (cur_path, fov_map, target_fov_map)) {
-                    int cur_to_src = path_map.d[cur.x][cur.y];
-                    int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target
-                            && cur_to_src < best_to_src) {
-                        best_to_src = cur_to_src;
-                        best_to_target = cur_to_target;
-                        best = cur;
-                    }
-                }
-                delete (cur_path);
-            }
-        }
-
-        // Leftwards segment of spiral ring
-        for (int i=1; i <= 2*ring + 2 ; i++) {
-            cur.x -= 1;
-            if (zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-                list<Coord>* cur_path = find_path (object_loc, cur, path_map);
-                if (path_in_fov (cur_path, fov_map, target_fov_map)) {
-                    int cur_to_src = path_map.d[cur.x][cur.y];
-                    int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target
-                            && cur_to_src < best_to_src) {
-                        best_to_src = cur_to_src;
-                        best_to_target = cur_to_target;
-                        best = cur;
-                    }
-                }
-                delete (cur_path);
-            }
-        }
-        // Downwards segment of spiral ring
-        for (int i=1; i <= 2*ring + 2 ; i++) {
-            cur.y -= 1;
-            if (zone->in_bounds (cur) && fov_map->isInFov (cur.x, cur.y)) {
-                list<Coord>* cur_path = find_path (object_loc, cur, path_map);
-                if (path_in_fov (cur_path, fov_map, target_fov_map)) {
-                    int cur_to_src = path_map.d[cur.x][cur.y];
-                    int cur_to_target = distance_to (cur, target);
-                    if (cur_to_target <= best_to_target
-                            && cur_to_src < best_to_src) {
-                        best_to_src = cur_to_src;
-                        best_to_target = cur_to_target;
-                        best = cur;
-                    }
-                }
-                delete (cur_path);
-            }
-        }
-
-        ring++;
-    }
 
     delete (target_fov_map);
-
     return (best);
 }
 
