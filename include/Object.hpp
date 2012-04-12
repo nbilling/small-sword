@@ -46,9 +46,13 @@ class Object {
 };
 
 class Lifeform : public Object {
-    private:
+    protected:
         int max_hp;
         int hp;
+        struct {
+            int back;
+            int right_hand;
+        } equipment;
 
     public:
         Lifeform (char new_c, const char* new_name, TCODColor new_color,
@@ -60,9 +64,37 @@ class Lifeform : public Object {
 
         int get_hp ();
 
+        int get_equipped_back ();
+
+        int get_equipped_right_hand ();
+
         void set_max_hp (int new_max_hp);
 
         void set_hp (int new_hp);
+
+        void equip_back (int obj_id);
+
+        void equip_right_hand (int obj_id);
+};
+
+class Weapon : public Object {
+    protected:
+        bool swingable;
+        int swing_damage;
+        int swing_range;
+
+    public:
+        Weapon (char new_c, const char* new_name, TCODColor new_color,
+                bool new_blocks, bool new_swingable, int new_swing_damage,
+                int new_swing_range);
+
+        ~Weapon ();
+
+        bool get_swingable ();
+
+        int get_swing_damage ();
+
+        int get_swing_range ();
 };
 
 #endif

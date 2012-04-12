@@ -76,6 +76,8 @@ Lifeform::Lifeform (char new_c, const char* new_name, TCODColor new_color,
 
     max_hp = new_max_hp;
     hp = max_hp;
+    equipment.back = 0;
+    equipment.right_hand = 0;
 }
 
 Lifeform::~Lifeform () {
@@ -90,10 +92,58 @@ int Lifeform::get_hp () {
     return (hp);
 }
 
+int Lifeform::get_equipped_back () {
+    return (equipment.back);
+}
+
+int Lifeform::get_equipped_right_hand () {
+    return (equipment.right_hand);
+}
+
 void Lifeform::set_max_hp (int new_max_hp) {
     max_hp = new_max_hp;
 }
 
 void Lifeform::set_hp (int new_hp) {
     hp = new_hp;
+}
+
+void Lifeform::equip_back (int obj_id) {
+    equipment.back = obj_id;
+}
+
+void Lifeform::equip_right_hand (int obj_id) {
+    equipment.right_hand = obj_id;
+}
+
+Weapon::Weapon (char new_c, const char* new_name, TCODColor new_color,
+        bool new_blocks, bool new_swingable, int new_swing_damage,
+        int new_swing_range) {
+    id = get_next_id ();
+    c = new_c;
+    name = new char[strlen (new_name)];
+    strcpy (name, new_name);
+    color = new_color;
+    blocks = new_blocks;
+
+    swingable = new_swingable;
+    swing_damage = new_swingable;
+    swing_range = new_swing_range;
+}
+
+Weapon::~Weapon () {
+    recycle_id ();
+    delete (name);
+}
+
+bool Weapon::get_swingable () {
+    return (swingable);
+}
+
+int Weapon::get_swing_damage () {
+    return (swing_damage);
+}
+
+int Weapon::get_swing_range () {
+    return (swing_range);
 }
