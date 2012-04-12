@@ -51,6 +51,9 @@ int main (int argc, const char** argv) {
 
     cerr << "+ Create player" << endl;
     Lifeform* player = new Lifeform ('@', "player", TCODColor::white, true, 20);
+    Weapon* sword = new Weapon (')', "sword", TCODColor::darkerGrey, false,
+            true, 2, 1);
+    player->equip_right_hand (sword->get_id ());
 
     cerr << "+ Place player" << endl;
     find_empty_tile (zone, player);

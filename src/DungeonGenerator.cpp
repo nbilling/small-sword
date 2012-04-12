@@ -37,31 +37,39 @@ void create_v_tunnel (Zone* zone, int y1, int y2, int x) {
 }
 
 void place_objects (Zone* zone, list<AI*>* ais, const Rect* room) {
-    TCODRandom* rng = TCODRandom::getInstance();
+    TCODRandom* rng = TCODRandom::getInstance ();
     //choose random number of monsters
-    int num_monsters = rng->getInt(0, MAX_ROOM_MONSTERS);
+    int num_monsters = rng->getInt (0, MAX_ROOM_MONSTERS);
 
     for (int i=0; i < num_monsters; i++) {
         //choose random spot for this monster
-        int x = rng->getInt(room->x1, room->x2);
-        int y = rng->getInt(room->y1, room->y2);
+        int x = rng->getInt (room->x1, room->x2);
+        int y = rng->getInt (room->y1, room->y2);
 
         //only place it if the tile is not blocked
         if (!zone->is_blocked ((Coord) {x, y})) {
-            Object* monster;
+            Lifeform* monster;
             if (rng->getInt(0, 100) < 80) {  //80% chance of getting an orc
                 //create an orc
                 monster = new Lifeform ('o', "orc", TCODColor::chartreuse,
                         true, 10);
+                //arm orc
+                Weapon* sword = new Weapon (')', "sword", TCODColor::darkerGrey,
+                        false, true, 2, 1);
+                monster->equip_right_hand (sword->get_id ());
             }
             else {
                 //create a troll
                 monster = new Lifeform ('T', "troll", TCODColor::sea,
                         true, 15);
+                //arm troll
+                Weapon* sword = new Weapon (')', "sword", TCODColor::darkerGrey,
+                        false, true, 2, 1);
+                monster->equip_right_hand (sword->get_id ());
             }
             zone->place_object (monster->get_id (), (Coord){x,y});
             AI* ai = new AI (monster, zone);
-            ais->push_back(ai);
+            ais->push_back (ai);
         }
     }
 }
