@@ -147,6 +147,8 @@ void TacticalUI::render_hud () {
     char target_desc[5 + strlen (target_name)];
     sprintf (target_loc, "%%c(%02i,%02i)%%c", target.x, target.y);
     sprintf (target_desc, "%%c%s%%c", target_name);
+    cout << target_loc << endl;
+    cout << target_desc << endl;
     hud_target_console->printEx (HUD_TARGET_COORD_X, HUD_TARGET_COORD_Y,
             TCOD_BKGND_NONE, TCOD_LEFT, target_loc, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
@@ -160,10 +162,9 @@ void TacticalUI::render_hud () {
             TCOD_COLCTRL_STOP);
     char hp[7];
     sprintf(hp,"%%cHP: %3i%%c",player->get_hp ());
-    hud_target_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
+    hud_status_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
             TCOD_BKGND_NONE, TCOD_LEFT, hp, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
-    (void) hp;
 }
 
 void TacticalUI::blit_map_console () {

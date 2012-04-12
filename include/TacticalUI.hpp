@@ -38,15 +38,15 @@ using namespace std;
 #define HUD_STATUS_H 7
 
 // Dimensions of fields in Target section.
-#define HUD_TARGET_COORD_X HUD_TARGET_X + 1
-#define HUD_TARGET_COORD_Y HUD_TARGET_Y + 1
+#define HUD_TARGET_COORD_X 1
+#define HUD_TARGET_COORD_Y 1
 
-#define HUD_TARGET_DESC_X HUD_TARGET_X + 1
-#define HUD_TARGET_DESC_Y HUD_TARGET_Y + 2
+#define HUD_TARGET_DESC_X 1
+#define HUD_TARGET_DESC_Y 2
 
 // Dimensions of fields in Status section.
-#define HUD_STATUS_HP_X HUD_STATUS_X + 1
-#define HUD_STATUS_HP_Y HUD_STATUS_Y + 1
+#define HUD_STATUS_HP_X 1
+#define HUD_STATUS_HP_Y 1
 
 // HUD color scheme.
 #define targeter_color TCODColor::blue
