@@ -34,7 +34,8 @@ inline bool AI::path_in_fov (list<Coord>* path, const TCODMap* fov1,
 }
 
 // Find closest feasible destination to target, if you start at src
-Coord AI::closest_dest_to_target (const Coord& target, const PathMap& path_map) {
+Coord AI::closest_dest_to_target (const Coord& target,
+        const PathMap& path_map) {
 
     TCODMap* target_fov_map = new TCODMap (80,45);
     target_fov_map->copy (fov_map);
