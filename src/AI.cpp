@@ -9,13 +9,13 @@ AI::AI (Object* new_object, Zone* new_zone) {
     last_seen = (Coord) {0,0};
 }
 
-map<int,Coord>* AI::visible_objects () {
-    map<int,Coord>* retval = new map<int,Coord> ();
+map<ObjId,Coord>* AI::visible_objects () {
+    map<ObjId,Coord>* retval = new map<ObjId,Coord> ();
     for (int i = 0; i < zone->width (); i ++)
         for (int j = 0; j < zone->height (); j++)
             if (fov_map->isInFov (i,j)) {
-                list<int>* temp = zone->objects_at ((Coord){i,j});
-                for (list<int>::iterator it = temp->begin ();
+                list<ObjId>* temp = zone->objects_at ((Coord){i,j});
+                for (list<ObjId>::iterator it = temp->begin ();
                         it != temp->end (); it++)
                     (*retval)[*it] = (Coord){i,j};
                 delete (temp);
@@ -116,10 +116,10 @@ AbilityInvocation* AI::take_turn () {
     object_loc = zone->location_of (object->get_id ());
     fov_map->computeFov(object_loc.x, object_loc.y, TORCH_RADIUS,
             FOV_LIGHT_WALLS);
-    map<int,Coord>* visible = visible_objects ();
+    map<ObjId,Coord>* visible = visible_objects ();
     bool player_spotted = false;
 
-    for (map<int,Coord>::iterator it = visible->begin ();
+    for (map<ObjId,Coord>::iterator it = visible->begin ();
             it != visible->end(); it++) {
         Lifeform* o = (Lifeform*) Object::get_object_by_id ((*it).first);
         Coord o_loc = (*it).second;

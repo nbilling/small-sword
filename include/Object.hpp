@@ -4,6 +4,7 @@
 #include "cstring"
 #include "cstdlib"
 #include "list"
+#include "assert.h"
 #include "iostream"
 #include "libtcod.hpp"
 #include "Types.hpp"
@@ -11,20 +12,40 @@
 
 using namespace std;
 
+class ObjId {
+    private:
+        int id;
+    public:
+        ObjId (int new_id=0);
+
+        ObjId& operator++ ();
+
+        ObjId& operator= (const ObjId& rhs);
+
+        ObjId& operator= (int new_id);
+
+        bool operator< (const ObjId& rhs) const;
+
+        bool operator! ();
+
+        operator bool ();
+};
+
+// Note: id=0 is the null object, there should never be an object with this id.
 class Object {
     protected:
-        int id;
+        ObjId id;
         char c;
         char* name;
         TCODColor color;
         bool blocks;
 
-        static int next_id;
-        static list<int>* recycled_ids;
+        static ObjId next_id;
+        static list<ObjId>* recycled_ids;
         static int object_count;
-        static map<int, Object*>* object_registry;
+        static map<ObjId, Object*>* object_registry;
 
-        int get_next_id ();
+        ObjId get_next_id ();
         void recycle_id ();
 
     public:
@@ -32,9 +53,11 @@ class Object {
 
         static void delete_registered_objects ();
 
-        static Object* get_object_by_id (int target_id);
+        static Object* get_object_by_id (ObjId target_id);
 
-        int get_id ();
+        virtual ObjType type () = 0;
+
+        ObjId get_id ();
 
         char get_char ();
 
@@ -50,8 +73,8 @@ class Lifeform : public Object {
         int max_hp;
         int hp;
         struct {
-            int back;
-            int right_hand;
+            ObjId back;
+            ObjId right_hand;
         } equipment;
 
     public:
@@ -60,21 +83,23 @@ class Lifeform : public Object {
 
         ~Lifeform ();
 
+        ObjType type ();
+
         int get_max_hp ();
 
         int get_hp ();
 
-        int get_equipped_back ();
+        ObjId get_equipped_back ();
 
-        int get_equipped_right_hand ();
+        ObjId get_equipped_right_hand ();
 
         void set_max_hp (int new_max_hp);
 
         void set_hp (int new_hp);
 
-        void equip_back (int obj_id);
+        void equip_back (ObjId obj_id);
 
-        void equip_right_hand (int obj_id);
+        void equip_right_hand (ObjId obj_id);
 };
 
 class Weapon : public Object {
@@ -89,6 +114,8 @@ class Weapon : public Object {
                 int new_swing_range);
 
         ~Weapon ();
+
+        ObjType type ();
 
         bool get_swingable ();
 

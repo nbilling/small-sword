@@ -1,7 +1,7 @@
 #include "Zone.hpp"
 
 Zone::Zone (int new_grid_w, int new_grid_h){
-    object_locations = new map<int,Coord> ();
+    object_locations = new map<ObjId,Coord> ();
 
     grid = new Tile**[new_grid_w];
     for (int i=0; i < new_grid_w; i++){
@@ -38,7 +38,7 @@ Zone::~Zone () {
 // Place object given by object_id at loc. Do nothing if loc is blocked.
 // If you call this on an object already in the zone then it will break
 // the zone.
-void Zone::place_object (int object_id,  const Coord& loc) {
+void Zone::place_object (ObjId object_id,  const Coord& loc) {
     if (blocked[loc.x][loc.y])
         return;
     (*object_locations)[object_id] = loc;
@@ -49,7 +49,7 @@ void Zone::place_object (int object_id,  const Coord& loc) {
 // Move object given by object_id to loc. Do nothing if loc is blocked.
 // If you call this on an object not already in the zone then it will
 // break the zone.
-void Zone::move_object (int object_id,  const Coord& loc) {
+void Zone::move_object (ObjId object_id,  const Coord& loc) {
     if (blocked[loc.x][loc.y])
         return;
     Coord old_loc = (*object_locations)[object_id];
@@ -67,9 +67,9 @@ bool Zone::in_bounds (const Coord& loc) {
     return (0 <= loc.x && loc.x < grid_w && 0 <= loc.y && loc.y < grid_h);
 }
 
-list<int>* Zone::objects_at (const Coord& loc) {
-    list<int>* retval = new list<int> ();
-    for (map<int,Coord>::iterator it = object_locations->begin ();
+list<ObjId>* Zone::objects_at (const Coord& loc) {
+    list<ObjId>* retval = new list<ObjId> ();
+    for (map<ObjId,Coord>::iterator it = object_locations->begin ();
             it != object_locations->end (); it++) {
         if (coord_eq ((*it).second, loc)) {
             retval->push_front ((*it).first);
@@ -78,7 +78,7 @@ list<int>* Zone::objects_at (const Coord& loc) {
     return (retval);
 }
 
-Coord Zone::location_of (int object_id) {
+Coord Zone::location_of (ObjId object_id) {
     return ((*object_locations)[object_id]);
 }
 

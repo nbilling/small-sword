@@ -44,9 +44,15 @@ using namespace std;
 #define HUD_TARGET_DESC_X 1
 #define HUD_TARGET_DESC_Y 2
 
+#define HUD_TARGET_R_X 1
+#define HUD_TARGET_R_Y 3
+
 // Dimensions of fields in Status section.
 #define HUD_STATUS_HP_X 1
 #define HUD_STATUS_HP_Y 1
+
+#define HUD_STATUS_R_X 1
+#define HUD_STATUS_R_Y 2
 
 // HUD color scheme.
 #define targeter_color TCODColor::blue
@@ -68,9 +74,8 @@ class TacticalUI {
         TCODConsole* hud_messages_console;
         TCODConsole* hud_target_console;
         TCODConsole* hud_status_console;
-        Coord target;
-        char* target_name;
-
+        Coord target_coord;
+        ObjId target_id;
         bool player_quit;
 
         void render_terrain ();

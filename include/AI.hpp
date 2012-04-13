@@ -34,7 +34,7 @@ class AI {
         Coord last_seen;
 
         void init_fov_map ();
-        map<int,Coord>* visible_objects ();
+        map<ObjId,Coord>* visible_objects ();
         Coord closest_dest_to_target (const Coord& target, const PathMap& path_map);
         StepInvocation* approach (const Coord& target);
         inline bool path_in_fov (list<Coord>* path, const TCODMap* fov1,

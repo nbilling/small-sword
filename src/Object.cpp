@@ -1,20 +1,52 @@
 #include "Object.hpp"
 
-int Object::next_id;
-list<int>* Object::recycled_ids = new list<int> ();
-int Object::object_count;
-map<int, Object*>* Object::object_registry = new map<int,Object*> ();
+ObjId::ObjId (int new_id) {
+    id = new_id;
+}
 
-int Object::get_next_id () {
+ObjId& ObjId::operator++ () {
+    id++;
+    return (*this);
+}
+
+ObjId& ObjId::operator= (const ObjId& rhs) {
+    if (this != &rhs)
+        id = rhs.id;
+    return (*this);
+}
+
+ObjId& ObjId::operator= (int new_id) {
+    id = new_id;
+    return (*this);
+}
+
+bool ObjId::operator< (const ObjId& rhs) const {
+    return (id < rhs.id);
+}
+
+bool ObjId::operator! () {
+    return (!id);
+}
+
+ObjId::operator bool () {
+    return ((bool) id);
+}
+
+ObjId Object::next_id;
+list<ObjId>* Object::recycled_ids = new list<ObjId> ();
+int Object::object_count;
+map<ObjId, Object*>* Object::object_registry = new map<ObjId,Object*> ();
+
+ObjId Object::get_next_id () {
     object_count++;
 
     if (recycled_ids->empty ()) {
-        next_id++;
+        ++next_id;
         (*object_registry)[next_id] = this;
         return (next_id);
     }
     else {
-        int retval = recycled_ids->front ();
+        ObjId retval = recycled_ids->front ();
         recycled_ids->pop_front ();
         (*object_registry)[retval] = this;
         return (retval);
@@ -39,11 +71,12 @@ void Object::delete_registered_objects () {
     }
 }
 
-Object* Object::get_object_by_id (int target_id) {
+Object* Object::get_object_by_id (ObjId target_id) {
+    assert (target_id);
     return ((*object_registry)[target_id]);
 }
 
-int Object::get_id () {
+ObjId Object::get_id () {
     return (id);
 }
 
@@ -84,6 +117,11 @@ Lifeform::~Lifeform () {
     recycle_id ();
     delete (name);
 }
+
+ObjType Lifeform::type () {
+    return (LifeformType);
+}
+
 int Lifeform::get_max_hp () {
     return (max_hp);
 }
@@ -92,11 +130,11 @@ int Lifeform::get_hp () {
     return (hp);
 }
 
-int Lifeform::get_equipped_back () {
+ObjId Lifeform::get_equipped_back () {
     return (equipment.back);
 }
 
-int Lifeform::get_equipped_right_hand () {
+ObjId Lifeform::get_equipped_right_hand () {
     return (equipment.right_hand);
 }
 
@@ -108,11 +146,11 @@ void Lifeform::set_hp (int new_hp) {
     hp = new_hp;
 }
 
-void Lifeform::equip_back (int obj_id) {
+void Lifeform::equip_back (ObjId obj_id) {
     equipment.back = obj_id;
 }
 
-void Lifeform::equip_right_hand (int obj_id) {
+void Lifeform::equip_right_hand (ObjId obj_id) {
     equipment.right_hand = obj_id;
 }
 
@@ -134,6 +172,10 @@ Weapon::Weapon (char new_c, const char* new_name, TCODColor new_color,
 Weapon::~Weapon () {
     recycle_id ();
     delete (name);
+}
+
+ObjType Weapon::type () {
+    return (WeaponType);
 }
 
 bool Weapon::get_swingable () {

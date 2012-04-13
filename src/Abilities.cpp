@@ -2,7 +2,7 @@
 #include "iostream"
 
 // WalkInvocation methods
-WalkInvocation::WalkInvocation (int new_obj_id, Zone* new_zone, 
+WalkInvocation::WalkInvocation (ObjId new_obj_id, Zone* new_zone, 
         list<Coord>* new_path) {
     obj_id = new_obj_id;
     zone = new_zone;
@@ -27,7 +27,7 @@ void WalkInvocation::execute () {
 }
 
 // StepInvocation methods
-StepInvocation::StepInvocation (int new_obj_id, Zone* new_zone, int new_direction) {
+StepInvocation::StepInvocation (ObjId new_obj_id, Zone* new_zone, int new_direction) {
     obj_id = new_obj_id;
     zone = new_zone;
     direction = new_direction;
@@ -81,7 +81,7 @@ void StepInvocation::execute () {
 }
 
 // NullInvocation methods
-NullInvocation::NullInvocation (int new_obj_id, Zone* new_zone) {
+NullInvocation::NullInvocation (ObjId new_obj_id, Zone* new_zone) {
     obj_id = new_obj_id;
     zone = new_zone;
 }
@@ -91,8 +91,8 @@ NullInvocation::~NullInvocation () {}
 void NullInvocation::execute () {}
 
 // AttackInvocation methods
-AttackInvocation::AttackInvocation (int new_obj_id, Zone* new_zone, 
-        int new_target_obj_id) {
+AttackInvocation::AttackInvocation (ObjId new_obj_id, Zone* new_zone, 
+        ObjId new_target_obj_id) {
     obj_id = new_obj_id;
     zone = new_zone;
     target_obj_id = new_target_obj_id;

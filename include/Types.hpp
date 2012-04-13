@@ -3,11 +3,18 @@
 
 class Zone;
 class AI;
+class ObjId;
 class Object;
+class Lifeform;
+class Weapon;
 class TacticalUI;
 class Tile;
 class Rect;
-class CSheet;
+
+enum ObjType {
+    LifeformType,
+    WeaponType
+};
 
 typedef struct {
     int x;

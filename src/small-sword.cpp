@@ -1,6 +1,8 @@
 #include "iostream"
 #include "list"
 #include "libtcod.hpp"
+#include "Types.hpp"
+#include "Object.hpp"
 #include "AI.hpp"
 #include "TacticalUI.hpp"
 #include "Zone.hpp"

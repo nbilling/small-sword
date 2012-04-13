@@ -15,7 +15,7 @@ using namespace std;
 class Zone{
     private:
         // Inhabitants
-        map<int,Coord>* object_locations;
+        map<ObjId,Coord>* object_locations;
 
         // Bookkeeping
         bool** blocked;
@@ -32,17 +32,17 @@ class Zone{
 
         ~Zone ();
 
-        void place_object (int object_id, const Coord& loc);
+        void place_object (ObjId object_id, const Coord& loc);
 
-        void move_object (int object_id, const Coord& loc);
+        void move_object (ObjId object_id, const Coord& loc);
 
         bool is_blocked (const Coord& loc);
 
         bool in_bounds (const Coord& loc);
 
-        list<int>* objects_at (const Coord& loc);
+        list<ObjId>* objects_at (const Coord& loc);
 
-        Coord location_of (int object_id);
+        Coord location_of (ObjId object_id);
 
         int width ();
 

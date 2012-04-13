@@ -8,7 +8,7 @@
 
 class AbilityInvocation {
     protected:
-        int obj_id;
+        ObjId obj_id;
         Zone* zone;
     public:
         virtual void execute () {};
@@ -18,7 +18,7 @@ class WalkInvocation : public AbilityInvocation {
     private:
         list <Coord>* path;
     public:
-        WalkInvocation (int new_obj_id, Zone* new_zone, list<Coord>* new_path);
+        WalkInvocation (ObjId new_obj_id, Zone* new_zone, list<Coord>* new_path);
         ~WalkInvocation ();
         void execute ();
 };
@@ -27,24 +27,24 @@ class StepInvocation : public AbilityInvocation {
     private:
         int direction;
     public:
-        StepInvocation (int new_obj_id, Zone* new_zone, int new_direction);
+        StepInvocation (ObjId new_obj_id, Zone* new_zone, int new_direction);
         ~StepInvocation ();
         void execute ();
 };
 
 class NullInvocation : public AbilityInvocation {
     public:
-        NullInvocation (int new_obj_id, Zone* zone);
+        NullInvocation (ObjId new_obj_id, Zone* zone);
         ~NullInvocation ();
         void execute ();
 };
 
 class AttackInvocation : public AbilityInvocation {
     private:
-        int target_obj_id;
+        ObjId target_obj_id;
     public:
-        AttackInvocation (int new_obj_id, Zone* new_zone,
-                int new_target_obj_id);
+        AttackInvocation (ObjId new_obj_id, Zone* new_zone,
+                ObjId new_target_obj_id);
         ~AttackInvocation ();
         void execute ();
 };

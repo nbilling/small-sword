@@ -13,12 +13,11 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
     hud_messages_console = new TCODConsole::TCODConsole (HUD_MESSAGES_W,
             HUD_MESSAGES_H);
     hud_target_console = new TCODConsole::TCODConsole (HUD_TARGET_W,
-            HUD_TARGET_H);
+             HUD_TARGET_H);
     hud_status_console = new TCODConsole::TCODConsole (HUD_STATUS_W,
             HUD_STATUS_H);
-    target = (Coord) {0,0};
-    target_name = new char[1];
-    strcpy (target_name, "");
+    target_coord = (Coord) {0,0};
+    target_id = 0;
     player_quit = false;
 }
 
@@ -28,7 +27,6 @@ TacticalUI::~TacticalUI () {
     delete (hud_messages_console);
     delete (hud_target_console);
     delete (hud_status_console);
-    delete (target_name);
 }
 
 void TacticalUI::render_terrain () {
@@ -66,7 +64,7 @@ void TacticalUI::render_objects () {
         for (int j = 0; j < zone->height (); j++) {
             //Only show if it's visible to the player
             if (player_fov_map->isInFov (i,j)) {
-                list<int>* temp = zone->objects_at ((Coord){i,j});
+                list<ObjId>* temp = zone->objects_at ((Coord){i,j});
                 if (!temp->empty ()) {
                     Object* o = Object::get_object_by_id (temp->front ());
                     //Set the color and then draw the character for this object
@@ -144,15 +142,27 @@ void TacticalUI::render_hud () {
             TCOD_BKGND_DEFAULT, "%cTARGET%c", TCOD_COLCTRL_1,
             TCOD_COLCTRL_STOP);
     char target_loc[12];
-    char target_desc[5 + strlen (target_name)];
-    sprintf (target_loc, "%%c(%02i,%02i)%%c", target.x, target.y);
-    sprintf (target_desc, "%%c%s%%c", target_name);
+    sprintf (target_loc, "%%c(%02i,%02i)%%c", target_coord.x, target_coord.y);
     hud_target_console->printEx (HUD_TARGET_COORD_X, HUD_TARGET_COORD_Y,
             TCOD_BKGND_NONE, TCOD_LEFT, target_loc, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
-    hud_target_console->printEx (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y,
-            TCOD_BKGND_NONE, TCOD_LEFT, target_desc, TCOD_COLCTRL_2,
-            TCOD_COLCTRL_STOP);
+    if (target_id) {
+        char* target_name = (Object::get_object_by_id (target_id))->get_name ();
+        char target_desc[5 + strlen (target_name)];
+        sprintf (target_desc, "%%c%s%%c", target_name);
+        hud_target_console->printEx (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y,
+                TCOD_BKGND_NONE, TCOD_LEFT, target_desc, TCOD_COLCTRL_2,
+                TCOD_COLCTRL_STOP);
+        char* target_right_hand_object_name =
+            (Object::get_object_by_id
+             (((Lifeform*) Object::get_object_by_id
+               (target_id))->get_equipped_right_hand ()))->get_name ();
+        char target_R[8 + strlen (target_right_hand_object_name)];
+        sprintf (target_R, "%%c%s%%c", target_right_hand_object_name);
+        hud_target_console->printEx (HUD_TARGET_R_X, HUD_TARGET_R_Y,
+                TCOD_BKGND_NONE, TCOD_LEFT, target_R, TCOD_COLCTRL_2,
+                TCOD_COLCTRL_STOP);
+    }
 
     // Draw Status
     hud_status_console->printFrame (0, 0, HUD_STATUS_W, HUD_STATUS_H, true,
@@ -162,6 +172,14 @@ void TacticalUI::render_hud () {
     sprintf(hp,"%%cHP: %3i%%c",player->get_hp ());
     hud_status_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
             TCOD_BKGND_NONE, TCOD_LEFT, hp, TCOD_COLCTRL_2,
+            TCOD_COLCTRL_STOP);
+    char* right_hand_object_name =
+        (Object::get_object_by_id
+         (player->get_equipped_right_hand ()))->get_name ();
+    char r[8 + strlen (right_hand_object_name)];
+    sprintf(r, "%%cR: %s%%c", right_hand_object_name);
+    hud_status_console->printEx (HUD_STATUS_R_X, HUD_STATUS_R_Y,
+            TCOD_BKGND_NONE, TCOD_LEFT, r, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
 }
 
@@ -181,18 +199,13 @@ void TacticalUI::blit_hud_console () {
 }
 
 void TacticalUI::move_target (Coord new_target) {
-    if (zone->in_bounds (new_target)) {target = new_target;};
-    list<int>* object_ids = zone->objects_at (target);
-    delete (target_name);
-    if (!object_ids->empty ()) {
-        Object* o = Object::get_object_by_id (object_ids->front ());
-        target_name = new char[strlen (o->get_name ())];
-        strcpy (target_name, o->get_name ());
-    }
-    else {
-        target_name = new char[1];
-        strcpy (target_name, "");
-    }
+    if (zone->in_bounds (new_target))
+        target_coord = new_target;
+    list<ObjId>* object_ids = zone->objects_at (target_coord);
+    if (!object_ids->empty ())
+        target_id = object_ids->front ();
+    else
+        target_id = 0;
 }
 
 TargetData TacticalUI::targeter () {
@@ -203,17 +216,17 @@ TargetData TacticalUI::targeter () {
     targeter_console->putChar (0, 0, 'X', TCOD_BKGND_NONE);
     targeter_console->setCharForeground (0, 0, targeter_color);
 
-    target = zone->location_of (player->get_id ());
+    target_coord = zone->location_of (player->get_id ());
 
     while (1) {
         blit_map_console ();
         render_hud ();
         blit_hud_console ();
-        TCODColor target_bk = map_console->getCharBackground (target.x,
-                target.y);
+        TCODColor target_bk = map_console->getCharBackground (target_coord.x,
+                target_coord.y);
         targeter_console->setCharBackground (0, 0, target_bk);
         TCODConsole::blit (targeter_console, 0, 0, 1, 1, TCODConsole::root,
-                target.x, target.y);
+                target_coord.x, target_coord.y);
         TCODConsole::flush ();
 
         TCODSystem::waitForEvent(
@@ -226,7 +239,7 @@ TargetData TacticalUI::targeter () {
         // Select target
         else if (key.vk == TCODK_ENTER && !(key.lalt || key.ralt)) {
             delete (targeter_console);
-            return ((TargetData) {key, target});
+            return ((TargetData) {key, target_coord});
         }
         // Cancel
         else if (key.vk == TCODK_ESCAPE) {
@@ -236,35 +249,35 @@ TargetData TacticalUI::targeter () {
         // Movement
         else if (key.vk == TCODK_CHAR && key.c == 'k') {
             //up
-            move_target ((Coord) {target.x, target.y - 1});
+            move_target ((Coord) {target_coord.x, target_coord.y - 1});
         }
         else if (key.vk == TCODK_CHAR && key.c =='j') {
             //down
-            move_target ((Coord) {target.x, target.y + 1});
+            move_target ((Coord) {target_coord.x, target_coord.y + 1});
         }
         else if (key.vk == TCODK_CHAR && key.c == 'h') {
             //left
-            move_target ((Coord) {target.x - 1, target.y});
+            move_target ((Coord) {target_coord.x - 1, target_coord.y});
         }
         else if (key.vk == TCODK_CHAR && key.c == 'l') {
             //right
-            move_target ((Coord) {target.x + 1, target.y});
+            move_target ((Coord) {target_coord.x + 1, target_coord.y});
         }
         else if (key.vk == TCODK_CHAR && key.c == 'y') {
             //up-left
-            move_target ((Coord) {target.x - 1, target.y - 1});
+            move_target ((Coord) {target_coord.x - 1, target_coord.y - 1});
         }
         else if (key.vk == TCODK_CHAR && key.c == 'u') {
             //up-right
-            move_target ((Coord) {target.x + 1, target.y - 1});
+            move_target ((Coord) {target_coord.x + 1, target_coord.y - 1});
         }
         else if (key.vk == TCODK_CHAR && key.c == 'b') {
             //down-left
-            move_target ((Coord) {target.x  - 1, target.y + 1});
+            move_target ((Coord) {target_coord.x  - 1, target_coord.y + 1});
         }
         else if (key.vk == TCODK_CHAR && key.c == 'n') {
             //down-right
-            move_target ((Coord) {target.x + 1, target.y + 1});
+            move_target ((Coord) {target_coord.x + 1, target_coord.y + 1});
         }
     }
 }
