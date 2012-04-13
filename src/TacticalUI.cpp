@@ -147,21 +147,29 @@ void TacticalUI::render_hud () {
             TCOD_BKGND_NONE, TCOD_LEFT, target_loc, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
     if (target_id) {
-        char* target_name = (Object::get_object_by_id (target_id))->get_name ();
+        Object* target = Object::get_object_by_id (target_id);
+        char* target_name = target->get_name ();
         char target_desc[5 + strlen (target_name)];
         sprintf (target_desc, "%%c%s%%c", target_name);
+        delete (target_name);
         hud_target_console->printEx (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y,
                 TCOD_BKGND_NONE, TCOD_LEFT, target_desc, TCOD_COLCTRL_2,
                 TCOD_COLCTRL_STOP);
-        char* target_right_hand_object_name =
-            (Object::get_object_by_id
-             (((Lifeform*) Object::get_object_by_id
-               (target_id))->get_equipped_right_hand ()))->get_name ();
-        char target_R[8 + strlen (target_right_hand_object_name)];
-        sprintf (target_R, "%%c%s%%c", target_right_hand_object_name);
-        hud_target_console->printEx (HUD_TARGET_R_X, HUD_TARGET_R_Y,
-                TCOD_BKGND_NONE, TCOD_LEFT, target_R, TCOD_COLCTRL_2,
-                TCOD_COLCTRL_STOP);
+        if (target->type () == LifeformType) {
+            ObjId target_R_object_id =
+                ((Lifeform*) target)->get_equipped_right_hand ();
+            if (target_R_object_id) {
+                char* target_R_object_name =
+                    (Object::get_object_by_id
+                     (target_R_object_id))->get_name ();
+                char target_R[8 + strlen (target_R_object_name)];
+                sprintf (target_R, "%%c%s%%c", target_R_object_name);
+                delete (target_R_object_name);
+                hud_target_console->printEx (HUD_TARGET_R_X, HUD_TARGET_R_Y,
+                        TCOD_BKGND_NONE, TCOD_LEFT, target_R, TCOD_COLCTRL_2,
+                        TCOD_COLCTRL_STOP);
+            }
+        }
     }
 
     // Draw Status
@@ -173,14 +181,16 @@ void TacticalUI::render_hud () {
     hud_status_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
             TCOD_BKGND_NONE, TCOD_LEFT, hp, TCOD_COLCTRL_2,
             TCOD_COLCTRL_STOP);
-    char* right_hand_object_name =
-        (Object::get_object_by_id
-         (player->get_equipped_right_hand ()))->get_name ();
-    char r[8 + strlen (right_hand_object_name)];
-    sprintf(r, "%%cR: %s%%c", right_hand_object_name);
-    hud_status_console->printEx (HUD_STATUS_R_X, HUD_STATUS_R_Y,
-            TCOD_BKGND_NONE, TCOD_LEFT, r, TCOD_COLCTRL_2,
-            TCOD_COLCTRL_STOP);
+    ObjId R_object_id = player->get_equipped_right_hand ();
+    if (R_object_id) {
+        char* R_object_name =
+            (Object::get_object_by_id (R_object_id))->get_name ();
+        char r[8 + strlen (R_object_name)];
+        sprintf(r, "%%cR: %s%%c", R_object_name);
+        hud_status_console->printEx (HUD_STATUS_R_X, HUD_STATUS_R_Y,
+                TCOD_BKGND_NONE, TCOD_LEFT, r, TCOD_COLCTRL_2,
+                TCOD_COLCTRL_STOP);
+    }
 }
 
 void TacticalUI::blit_map_console () {
