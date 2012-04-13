@@ -56,6 +56,9 @@ all : release
 
 release : small-sword
 
+E%.cpp :
+	$(CPP) src/$*.cpp $(CFLAGS) $(TCOD_LIBS) $(ZLIB_LIBS) $(PNG_LIBS) $(SDL_LIBS) -E > preprocessed_$*.cpp
+
 #apps: samples_c.app samples_cpp.app hmtool.app
 
 #$(TEMP)/libtcod/debug/hmtool :
