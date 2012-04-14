@@ -59,6 +59,17 @@ void Zone::move_object (ObjId object_id,  const Coord& loc) {
         || (Object::get_object_by_id (object_id))->get_blocks ();
 }
 
+void Zone::remove_object (ObjId id) {
+    assert (id);
+    object_locations->erase (id);
+}
+
+void Zone::refresh_object (ObjId id) {
+    Coord loc = location_of (id);
+    blocked[loc.x][loc.y] = grid[loc.x][loc.y]->blocked
+        || (Object::get_object_by_id (id))->get_blocks ();
+}
+
 bool Zone::is_blocked (const Coord& loc) {
     return (blocked[loc.x][loc.y]);
 }

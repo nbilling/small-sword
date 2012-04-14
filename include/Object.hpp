@@ -66,6 +66,12 @@ class Object {
         TCODColor get_color ();
 
         bool get_blocks ();
+
+        void set_char (char new_c);
+
+        void set_color (TCODColor new_color);
+
+        void set_blocks (bool new_blocks);
 };
 
 class Lifeform : public Object {
@@ -123,5 +129,4 @@ class Weapon : public Object {
 
         int get_swing_range ();
 };
-
 #endif

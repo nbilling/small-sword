@@ -98,6 +98,18 @@ bool Object::get_blocks () {
     return (blocks);
 }
 
+void Object::set_char (char new_c) {
+    c = new_c;
+}
+
+void Object::set_color (TCODColor new_color) {
+    color = new_color;
+}
+
+void Object::set_blocks (bool new_blocks) {
+    blocks = new_blocks;
+}
+
 Lifeform::Lifeform (char new_c, const char* new_name, TCODColor new_color,
         bool new_blocks, int new_max_hp) {
     id = get_next_id ();
@@ -165,7 +177,7 @@ Weapon::Weapon (char new_c, const char* new_name, TCODColor new_color,
     blocks = new_blocks;
 
     swingable = new_swingable;
-    swing_damage = new_swingable;
+    swing_damage = new_swing_damage;
     swing_range = new_swing_range;
 }
 

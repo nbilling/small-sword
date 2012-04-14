@@ -91,7 +91,7 @@ NullInvocation::~NullInvocation () {}
 void NullInvocation::execute () {}
 
 // AttackInvocation methods
-AttackInvocation::AttackInvocation (ObjId new_obj_id, Zone* new_zone, 
+AttackInvocation::AttackInvocation (ObjId new_obj_id, Zone* new_zone,
         ObjId new_target_obj_id) {
     obj_id = new_obj_id;
     zone = new_zone;
@@ -102,5 +102,23 @@ AttackInvocation::~AttackInvocation () {}
 
 void AttackInvocation::execute () {
     Lifeform* target = (Lifeform*) Object::get_object_by_id (target_obj_id);
-    target->set_hp (target->get_hp () - 1);
+    ObjId R_id = ((Lifeform*) Object::get_object_by_id
+            (obj_id))->get_equipped_right_hand ();
+    if (R_id) {
+        Object* R_object = Object::get_object_by_id (R_id);
+        if (R_object->type () == WeaponType)
+            if (distance_to (zone->location_of (obj_id),
+                        zone->location_of (target_obj_id))
+                    <= ((Weapon*) R_object)->get_swing_range ())
+                target->set_hp (target->get_hp ()
+                     - ((Weapon*) R_object)->get_swing_damage ());
+    }
+    else
+        target->set_hp (target->get_hp () - 1);
+    if (target->get_hp () <= 0) {
+        target->set_char ('%');
+        target->set_color(TCODColor::red);
+        target->set_blocks (false);
+        zone->refresh_object (target->get_id ());
+    }
 }

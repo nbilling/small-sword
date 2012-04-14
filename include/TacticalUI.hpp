@@ -57,11 +57,6 @@ using namespace std;
 // HUD color scheme.
 #define targeter_color TCODColor::blue
 
-typedef struct {
-    TCOD_key_t key;
-    Coord coord;
-} TargetData;
-
 class TacticalUI {
     private:
         Zone* zone;
@@ -106,7 +101,9 @@ class TacticalUI {
 
         void move_target (Coord new_target);
 
-        TargetData targeter ();
+        ObjId object_targeter ();
+
+        Coord tile_targeter ();
 
         AbilityInvocation* handle_keys ();
 

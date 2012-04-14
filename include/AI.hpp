@@ -20,6 +20,7 @@ class AI {
     public:
         AI (Object* new_object, Zone* zone);
         AbilityInvocation* take_turn ();
+        bool is_dead ();
 
     private:
         Zone* zone;

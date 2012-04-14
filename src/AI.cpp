@@ -155,3 +155,6 @@ AbilityInvocation* AI::take_turn () {
     return (new NullInvocation (object->get_id (), zone));
 }
 
+bool AI::is_dead () {
+    return (((Lifeform*) object)->get_hp () <= 0);
+}

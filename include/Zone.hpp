@@ -36,6 +36,10 @@ class Zone{
 
         void move_object (ObjId object_id, const Coord& loc);
 
+        void remove_object (ObjId id);
+
+        void refresh_object (ObjId id);
+
         bool is_blocked (const Coord& loc);
 
         bool in_bounds (const Coord& loc);

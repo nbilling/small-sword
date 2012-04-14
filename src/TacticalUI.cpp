@@ -218,7 +218,7 @@ void TacticalUI::move_target (Coord new_target) {
         target_id = 0;
 }
 
-TargetData TacticalUI::targeter () {
+ObjId TacticalUI::object_targeter () {
     TCOD_key_t key = {TCODK_NONE,0};
     TCOD_mouse_t mouse;
 
@@ -249,12 +249,86 @@ TargetData TacticalUI::targeter () {
         // Select target
         else if (key.vk == TCODK_ENTER && !(key.lalt || key.ralt)) {
             delete (targeter_console);
-            return ((TargetData) {key, target_coord});
+            return (target_id);
         }
         // Cancel
         else if (key.vk == TCODK_ESCAPE) {
             delete (targeter_console);
-            return ((TargetData) {key, ((Coord) {0,0})});
+            return (ObjId (0));
+        }
+        // Movement
+        else if (key.vk == TCODK_CHAR && key.c == 'k') {
+            //up
+            move_target ((Coord) {target_coord.x, target_coord.y - 1});
+        }
+        else if (key.vk == TCODK_CHAR && key.c =='j') {
+            //down
+            move_target ((Coord) {target_coord.x, target_coord.y + 1});
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'h') {
+            //left
+            move_target ((Coord) {target_coord.x - 1, target_coord.y});
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'l') {
+            //right
+            move_target ((Coord) {target_coord.x + 1, target_coord.y});
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'y') {
+            //up-left
+            move_target ((Coord) {target_coord.x - 1, target_coord.y - 1});
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'u') {
+            //up-right
+            move_target ((Coord) {target_coord.x + 1, target_coord.y - 1});
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'b') {
+            //down-left
+            move_target ((Coord) {target_coord.x  - 1, target_coord.y + 1});
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'n') {
+            //down-right
+            move_target ((Coord) {target_coord.x + 1, target_coord.y + 1});
+        }
+    }
+}
+
+Coord TacticalUI::tile_targeter () {
+    TCOD_key_t key = {TCODK_NONE,0};
+    TCOD_mouse_t mouse;
+
+    TCODConsole* targeter_console = new TCODConsole::TCODConsole (1,1);
+    targeter_console->putChar (0, 0, 'X', TCOD_BKGND_NONE);
+    targeter_console->setCharForeground (0, 0, targeter_color);
+
+    target_coord = zone->location_of (player->get_id ());
+
+    while (1) {
+        blit_map_console ();
+        render_hud ();
+        blit_hud_console ();
+        TCODColor target_bk = map_console->getCharBackground (target_coord.x,
+                target_coord.y);
+        targeter_console->setCharBackground (0, 0, target_bk);
+        TCODConsole::blit (targeter_console, 0, 0, 1, 1, TCODConsole::root,
+                target_coord.x, target_coord.y);
+        TCODConsole::flush ();
+
+        TCODSystem::waitForEvent(
+                (TCOD_event_t)(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE), &key,
+                &mouse, false);
+        // Fullscreen
+        if (key.vk == TCODK_ENTER && (key.lalt || key.ralt)) {
+            TCODConsole::setFullscreen (!TCODConsole::isFullscreen());
+        }
+        // Select target
+        else if (key.vk == TCODK_ENTER && !(key.lalt || key.ralt)) {
+            delete (targeter_console);
+            return (target_coord);
+        }
+        // Cancel
+        else if (key.vk == TCODK_ESCAPE) {
+            delete (targeter_console);
+            return ((Coord) {-1,-1});
         }
         // Movement
         else if (key.vk == TCODK_CHAR && key.c == 'k') {
@@ -337,9 +411,18 @@ AbilityInvocation* TacticalUI::handle_keys () {
         }
         else if (key.vk == TCODK_CHAR && key.c == 'x') {
             // Call function to do targetting.
-            targeter ();
+            tile_targeter ();
             blit_map_console ();
             TCODConsole::flush ();
+        }
+        else if (key.vk == TCODK_CHAR && key.c == 'a') {
+            ObjId objid = object_targeter ();
+            blit_map_console ();
+            TCODConsole::flush ();
+            if (objid) {
+                if ((Object::get_object_by_id (objid))->type () == LifeformType)
+                    return (new AttackInvocation (player->get_id (), zone, objid));
+            }
         }
         else {
             return (new NullInvocation (player->get_id (), zone));
@@ -367,14 +450,23 @@ int TacticalUI::display () {
         if (player_quit) {
             break;
         }
+        if (player->get_hp () <= 0) {
+            break;
+        }
         player_action->execute ();
         delete (player_action);
 
         for (list<AI*>::iterator ai = ais->begin ();
                 ai != ais->end (); ai++) {
-            AbilityInvocation* ai_action = (*ai)->take_turn ();
-            ai_action->execute ();
-            delete (ai_action);
+            if ((*ai)->is_dead ()) {
+                delete (*ai);
+                ais->erase (ai);
+            }
+            else {
+                AbilityInvocation* ai_action = (*ai)->take_turn ();
+                ai_action->execute ();
+                delete (ai_action);
+            }
         }
     }
     return (0);

@@ -52,9 +52,9 @@ int main (int argc, const char** argv) {
     make_grid (zone, ais);
 
     cerr << "+ Create player" << endl;
-    Lifeform* player = new Lifeform ('@', "player", TCODColor::white, true, 20);
+    Lifeform* player = new Lifeform ('@', "player", TCODColor::white, true, 50);
     Weapon* sword = new Weapon (')', "sword", TCODColor::darkerGrey, false,
-            true, 2, 1);
+            true, 10, 1);
     player->equip_right_hand (sword->get_id ());
 
     cerr << "+ Place player" << endl;
