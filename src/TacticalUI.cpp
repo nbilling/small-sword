@@ -10,12 +10,18 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
     map_console_w = zone->width ();
     map_console_h = zone->height ();
     map_console = new TCODConsole::TCODConsole (map_console_w, map_console_h);
-    hud_messages_console = new TCODConsole::TCODConsole (HUD_MESSAGES_W,
-            HUD_MESSAGES_H);
-    hud_target_console = new TCODConsole::TCODConsole (HUD_TARGET_W,
-             HUD_TARGET_H);
-    hud_status_console = new TCODConsole::TCODConsole (HUD_STATUS_W,
-            HUD_STATUS_H);
+    hud_frame_messages_console = new TCODConsole::TCODConsole
+        (HUD_FRAME_MESSAGES_W, HUD_FRAME_MESSAGES_H);
+    hud_frame_target_console = new TCODConsole::TCODConsole
+        (HUD_FRAME_TARGET_W, HUD_FRAME_TARGET_H);
+    hud_frame_status_console = new TCODConsole::TCODConsole
+        (HUD_FRAME_STATUS_W, HUD_FRAME_STATUS_H);
+    hud_messages_console = new TCODConsole::TCODConsole
+        (HUD_MESSAGES_W, HUD_MESSAGES_H);
+    hud_target_console = new TCODConsole::TCODConsole
+        (HUD_TARGET_W, HUD_TARGET_H);
+    hud_status_console = new TCODConsole::TCODConsole
+        (HUD_STATUS_W, HUD_STATUS_H);
     target_coord = (Coord) {0,0};
     target_id = 0;
     player_quit = false;
@@ -24,6 +30,9 @@ TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
 TacticalUI::~TacticalUI () {
     delete (player_fov_map);
     delete (map_console);
+    delete (hud_frame_messages_console);
+    delete (hud_frame_target_console);
+    delete (hud_frame_status_console);
     delete (hud_messages_console);
     delete (hud_target_console);
     delete (hud_status_console);
@@ -88,59 +97,32 @@ void TacticalUI::clear_objects () {
     }
 }
 
-void TacticalUI::bkgnd_rect (int x, int y, int w, int h, TCODColor color,
-        TCODConsole* console) {
-    assert (x >= 0 && y >= 0 &&
-            x + w <= console->getWidth () && y + h <= console->getHeight ());
-    for (int i = x; i < x + w; i++) {
-        for (int j = y; j < y + h; j++) {
-            console->setCharBackground (i, j, color);
-        }
-    }
+void TacticalUI::render_map () {
+    render_terrain ();
+    clear_objects ();
+    render_objects ();
 }
 
-void TacticalUI::bkgnd_hline (int x, int y, int l, TCODColor color,
-        TCODConsole* console) {
-    bkgnd_rect (x, y, l, 1, color, console);
-}
-
-void TacticalUI::bkgnd_vline (int x, int y, int l, TCODColor color,
-        TCODConsole* console) {
-    bkgnd_rect (x, y, 1, l, color, console);
-}
-
-void TacticalUI::draw_bkgnd_frame (int x, int y, int w, int h, TCODColor color,
-        const char* str, TCODColor str_color, TCODConsole* console) {
-    bkgnd_hline (x, y, w, color, console);
-    bkgnd_hline (x, y + h - 1, w, color, console);
-    bkgnd_vline (x, y, h, color, console);
-    bkgnd_vline (x + w - 1, y, h, color, console);
-    char* temp = new char[strlen (str) + 4];
-    sprintf (temp, "%%c%s%%c", str);
-    TCODConsole::setColorControl (TCOD_COLCTRL_1,
-            TCODColor::black + TCODColor::darkerGrey, TCODColor::lightGrey);
-    console->printEx ((x + w) / 2 - 1, y, TCOD_BKGND_SCREEN, TCOD_CENTER, temp,
-            TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
-    delete (temp);
-}
-
-void TacticalUI::render_hud () {
+void TacticalUI::render_hud_messages () {
     // Set up color control code for HUD section labels (black on white)
     TCODConsole::setColorControl (TCOD_COLCTRL_1, TCODColor::darkerGrey,
             TCODColor::white);
+    hud_frame_messages_console->printFrame (0, 0, HUD_FRAME_MESSAGES_W,
+            HUD_FRAME_MESSAGES_H, true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c",
+            TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+}
+
+void TacticalUI::render_hud_target () {
+    // Set up color control code for HUD section labels (black on white)
+    TCODConsole::setColorControl (TCOD_COLCTRL_1, TCODColor::darkerGrey,
+            TCODColor::white);
+    hud_frame_target_console->printFrame (0, 0, HUD_FRAME_TARGET_W,
+            HUD_FRAME_TARGET_H, true, TCOD_BKGND_DEFAULT, "%cTARGET%c",
+            TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+
     // Set up color control code for HUD section text (white on black)
     TCODConsole::setColorControl (TCOD_COLCTRL_2, TCODColor::white,
             TCODColor::black);
-
-    // Draw Messages
-    hud_messages_console->printFrame (0, 0, HUD_MESSAGES_W, HUD_MESSAGES_H,
-            true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c", TCOD_COLCTRL_1,
-            TCOD_COLCTRL_STOP);
-
-    // Draw Target
-    hud_target_console->printFrame (0, 0, HUD_TARGET_W, HUD_TARGET_H, true,
-            TCOD_BKGND_DEFAULT, "%cTARGET%c", TCOD_COLCTRL_1,
-            TCOD_COLCTRL_STOP);
     char target_loc[12];
     sprintf (target_loc, "%%c(%02i,%02i)%%c", target_coord.x, target_coord.y);
     hud_target_console->printEx (HUD_TARGET_COORD_X, HUD_TARGET_COORD_Y,
@@ -171,11 +153,18 @@ void TacticalUI::render_hud () {
             }
         }
     }
+}
 
-    // Draw Status
-    hud_status_console->printFrame (0, 0, HUD_STATUS_W, HUD_STATUS_H, true,
-            TCOD_BKGND_DEFAULT, "%cSTATUS%c", TCOD_COLCTRL_1,
-            TCOD_COLCTRL_STOP);
+void TacticalUI::render_hud_status () {
+    // Set up color control code for HUD section labels (black on white)
+    TCODConsole::setColorControl (TCOD_COLCTRL_1, TCODColor::darkerGrey,
+            TCODColor::white);
+    hud_frame_status_console->printFrame (0, 0, HUD_FRAME_STATUS_W,
+            HUD_FRAME_STATUS_H, true, TCOD_BKGND_DEFAULT, "%cSTATUS%c",
+            TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    // Set up color control code for HUD section text (white on black)
+    TCODConsole::setColorControl (TCOD_COLCTRL_2, TCODColor::white,
+            TCODColor::black);
     char hp[7];
     sprintf(hp,"%%cHP: %3i%%c",player->get_hp ());
     hud_status_console->printEx (HUD_STATUS_HP_X, HUD_STATUS_HP_Y,
@@ -193,19 +182,47 @@ void TacticalUI::render_hud () {
     }
 }
 
-void TacticalUI::blit_map_console () {
+void TacticalUI::render_hud () {
+    render_hud_messages ();
+    render_hud_target ();
+    render_hud_status ();
+}
+
+void TacticalUI::blit_map () {
     TCODConsole::blit (map_console, 0, 0, map_console_w, map_console_h,
             TCODConsole::root, MAP_X, MAP_Y);
 }
 
-void TacticalUI::blit_hud_console () {
+void TacticalUI::blit_hud_messages () {
+    TCODConsole::blit (hud_frame_messages_console, 0, 0, HUD_FRAME_MESSAGES_W,
+            HUD_FRAME_MESSAGES_H, TCODConsole::root,
+            HUD_X + HUD_FRAME_MESSAGES_X,
+            HUD_Y + HUD_FRAME_MESSAGES_Y);
     TCODConsole::blit (hud_messages_console, 0, 0, HUD_MESSAGES_W,
             HUD_MESSAGES_H, TCODConsole::root, HUD_X + HUD_MESSAGES_X,
             HUD_Y + HUD_MESSAGES_Y);
+}
+
+void TacticalUI::blit_hud_target () {
+    TCODConsole::blit (hud_frame_target_console, 0, 0, HUD_FRAME_TARGET_W,
+            HUD_FRAME_TARGET_H, TCODConsole::root,
+            HUD_X + HUD_FRAME_TARGET_X, HUD_Y + HUD_FRAME_TARGET_Y);
     TCODConsole::blit (hud_target_console, 0, 0, HUD_TARGET_W, HUD_TARGET_H,
             TCODConsole::root, HUD_X + HUD_TARGET_X, HUD_Y + HUD_TARGET_Y);
+}
+
+void TacticalUI::blit_hud_status () {
+    TCODConsole::blit (hud_frame_status_console, 0, 0, HUD_FRAME_STATUS_W,
+            HUD_FRAME_STATUS_H, TCODConsole::root, HUD_X + HUD_FRAME_STATUS_X,
+            HUD_Y + HUD_FRAME_STATUS_Y);
     TCODConsole::blit (hud_status_console, 0, 0, HUD_STATUS_W, HUD_STATUS_H,
             TCODConsole::root, HUD_X + HUD_STATUS_X, HUD_Y + HUD_STATUS_Y);
+}
+
+void TacticalUI::blit_hud () {
+    blit_hud_messages ();
+    blit_hud_target ();
+    blit_hud_status ();
 }
 
 void TacticalUI::move_target (Coord new_target) {
@@ -229,9 +246,9 @@ ObjId TacticalUI::object_targeter () {
     target_coord = zone->location_of (player->get_id ());
 
     while (1) {
-        blit_map_console ();
+        blit_map ();
         render_hud ();
-        blit_hud_console ();
+        blit_hud ();
         TCODColor target_bk = map_console->getCharBackground (target_coord.x,
                 target_coord.y);
         targeter_console->setCharBackground (0, 0, target_bk);
@@ -303,9 +320,9 @@ Coord TacticalUI::tile_targeter () {
     target_coord = zone->location_of (player->get_id ());
 
     while (1) {
-        blit_map_console ();
+        blit_map ();
         render_hud ();
-        blit_hud_console ();
+        blit_hud ();
         TCODColor target_bk = map_console->getCharBackground (target_coord.x,
                 target_coord.y);
         targeter_console->setCharBackground (0, 0, target_bk);
@@ -412,12 +429,12 @@ AbilityInvocation* TacticalUI::handle_keys () {
         else if (key.vk == TCODK_CHAR && key.c == 'x') {
             // Call function to do targetting.
             tile_targeter ();
-            blit_map_console ();
+            blit_map ();
             TCODConsole::flush ();
         }
         else if (key.vk == TCODK_CHAR && key.c == 'a') {
             ObjId objid = object_targeter ();
-            blit_map_console ();
+            blit_map ();
             TCODConsole::flush ();
             if (objid) {
                 if ((Object::get_object_by_id (objid))->type () == LifeformType)
@@ -436,13 +453,11 @@ int TacticalUI::display () {
         player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS,
                 FOV_LIGHT_WALLS);
 
-        render_terrain ();
-        clear_objects ();
-        render_objects ();
-        blit_map_console ();
+        render_map ();
+        blit_map ();
 
         render_hud ();
-        blit_hud_console ();
+        blit_hud ();
 
         TCODConsole::flush ();
 
