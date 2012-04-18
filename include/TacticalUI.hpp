@@ -10,6 +10,7 @@
 #include "Zone.hpp"
 #include "Object.hpp"
 #include "AI.hpp"
+#include "Terminal.hpp"
 using namespace std;
 
 // Map dimensions
@@ -75,21 +76,28 @@ using namespace std;
 class TacticalUI {
     private:
         Zone* zone;
+
         list<AI*>* ais;
+
         Lifeform* player;
         TCODMap* player_fov_map;
+        bool player_quit;
+
         TCODConsole* map_console;
         int map_console_w;
         int map_console_h;
+
         TCODConsole* hud_frame_messages_console;
-        TCODConsole* hud_frame_target_console;
-        TCODConsole* hud_frame_status_console;
         TCODConsole* hud_messages_console;
+        Terminal* messages_terminal;
+
+        TCODConsole* hud_frame_target_console;
         TCODConsole* hud_target_console;
-        TCODConsole* hud_status_console;
         Coord target_coord;
         ObjId target_id;
-        bool player_quit;
+
+        TCODConsole* hud_frame_status_console;
+        TCODConsole* hud_status_console;
 
         void render_terrain ();
 

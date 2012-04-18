@@ -4,27 +4,35 @@
 TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
         Lifeform* new_player) {
     zone = new_zone;
+
     ais = new_ais;
+
     player = new_player;
     player_fov_map = zone->new_fov_map ();
+    player_quit = false;
+
+    map_console = new TCODConsole::TCODConsole
+        (zone->width (), zone->height ());
     map_console_w = zone->width ();
     map_console_h = zone->height ();
-    map_console = new TCODConsole::TCODConsole (map_console_w, map_console_h);
+
     hud_frame_messages_console = new TCODConsole::TCODConsole
         (HUD_FRAME_MESSAGES_W, HUD_FRAME_MESSAGES_H);
-    hud_frame_target_console = new TCODConsole::TCODConsole
-        (HUD_FRAME_TARGET_W, HUD_FRAME_TARGET_H);
-    hud_frame_status_console = new TCODConsole::TCODConsole
-        (HUD_FRAME_STATUS_W, HUD_FRAME_STATUS_H);
     hud_messages_console = new TCODConsole::TCODConsole
         (HUD_MESSAGES_W, HUD_MESSAGES_H);
+    messages_terminal = new Terminal (HUD_MESSAGES_W);
+
+    hud_frame_target_console = new TCODConsole::TCODConsole
+        (HUD_FRAME_TARGET_W, HUD_FRAME_TARGET_H);
     hud_target_console = new TCODConsole::TCODConsole
         (HUD_TARGET_W, HUD_TARGET_H);
-    hud_status_console = new TCODConsole::TCODConsole
-        (HUD_STATUS_W, HUD_STATUS_H);
     target_coord = (Coord) {0,0};
     target_id = 0;
-    player_quit = false;
+
+    hud_frame_status_console = new TCODConsole::TCODConsole
+        (HUD_FRAME_STATUS_W, HUD_FRAME_STATUS_H);
+    hud_status_console = new TCODConsole::TCODConsole
+        (HUD_STATUS_W, HUD_STATUS_H);
 }
 
 TacticalUI::~TacticalUI () {
@@ -110,6 +118,15 @@ void TacticalUI::render_hud_messages () {
     hud_frame_messages_console->printFrame (0, 0, HUD_FRAME_MESSAGES_W,
             HUD_FRAME_MESSAGES_H, true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c",
             TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    list<char*>* lines = messages_terminal->get_lines (HUD_MESSAGES_H);
+    list<char*>::reverse_iterator it = lines->rbegin ();
+    for (int i = HUD_MESSAGES_H - 1; i >= 0 && it != lines->rend (); i--) {
+        char* temp = new char[2 + strlen (*it) + 2 + 1];
+        sprintf (temp, "%%c%s%%c", *it);
+        hud_messages_console->printEx (0, i, TCOD_BKGND_NONE, TCOD_LEFT, temp,
+                TCOD_COLCTRL_2, TCOD_COLCTRL_STOP);
+        it++;
+    }
 }
 
 void TacticalUI::render_hud_target () {
@@ -438,7 +455,8 @@ AbilityInvocation* TacticalUI::handle_keys () {
             TCODConsole::flush ();
             if (objid) {
                 if ((Object::get_object_by_id (objid))->type () == LifeformType)
-                    return (new AttackInvocation (player->get_id (), zone, objid));
+                    return (new AttackInvocation (player->get_id (), zone,
+                                objid));
             }
         }
         else {
@@ -448,6 +466,8 @@ AbilityInvocation* TacticalUI::handle_keys () {
 }
 
 int TacticalUI::display () {
+    messages_terminal->append ("Welcome to small-sword tech-demo");
+    messages_terminal->append ("Enjoy your stay");
     while (!TCODConsole::isWindowClosed ()) {
         Coord player_loc = zone->location_of (player->get_id ());
         player_fov_map->computeFov (player_loc.x, player_loc.y, TORCH_RADIUS,

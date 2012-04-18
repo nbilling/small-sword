@@ -10,6 +10,7 @@ class Weapon;
 class TacticalUI;
 class Tile;
 class Rect;
+class Terminal;
 
 enum ObjType {
     LifeformType,

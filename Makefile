@@ -49,7 +49,9 @@ OBJS_RELEASE=$(TEMP)/small-sword/release/src/small-sword.o \
 	$(TEMP)/small-sword/release/src/TacticalUI.o \
 	$(TEMP)/small-sword/release/src/Tile.o \
 	$(TEMP)/small-sword/release/src/Zone.o \
-	$(TEMP)/small-sword/release/src/Pathfinding.o
+	$(TEMP)/small-sword/release/src/Pathfinding.o \
+	$(TEMP)/small-sword/release/src/Terminal.o
+	
 
 
 all : release
