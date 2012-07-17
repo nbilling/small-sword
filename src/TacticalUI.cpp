@@ -115,9 +115,13 @@ void TacticalUI::render_hud_messages () {
     // Set up color control code for HUD section labels (black on white)
     TCODConsole::setColorControl (TCOD_COLCTRL_1, TCODColor::darkerGrey,
             TCODColor::white);
+    // clear the damn hud_messages_console here!!!
     hud_frame_messages_console->printFrame (0, 0, HUD_FRAME_MESSAGES_W,
             HUD_FRAME_MESSAGES_H, true, TCOD_BKGND_DEFAULT, "%cMESSAGES%c",
             TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    for (int x=0; x < HUD_MESSAGES_W; x++)
+        for (int y=0; y < HUD_MESSAGES_H; y++)
+            hud_messages_console->putChar (x, y, ' ', TCOD_BKGND_NONE);
     list<char*>* lines = messages_terminal->get_lines (HUD_MESSAGES_H);
     list<char*>::reverse_iterator it = lines->rbegin ();
     for (int i = HUD_MESSAGES_H - 1; i >= 0 && it != lines->rend (); i--) {
@@ -489,6 +493,8 @@ int TacticalUI::display () {
             break;
         }
         player_action->execute ();
+        cout << player_action->message ();
+        messages_terminal->append (player_action->message ());
         delete (player_action);
 
         for (list<AI*>::iterator ai = ais->begin ();

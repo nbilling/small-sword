@@ -2,7 +2,7 @@
 #include "iostream"
 
 // WalkInvocation methods
-WalkInvocation::WalkInvocation (ObjId new_obj_id, Zone* new_zone, 
+WalkInvocation::WalkInvocation (ObjId new_obj_id, Zone* new_zone,
         list<Coord>* new_path) {
     obj_id = new_obj_id;
     zone = new_zone;
@@ -14,10 +14,11 @@ WalkInvocation::~WalkInvocation (){
 }
 
 void WalkInvocation::execute () {
-    for (list<Coord>::iterator it = path->begin (); 
+    for (list<Coord>::iterator it = path->begin ();
             it != path->end (); it++) {
         if (!zone->in_bounds (*it)) {
-            cerr << "Abilities => walk => attempt to walk out of bounds" << endl;
+            cerr << "Abilities => walk => attempt to walk out of bounds"
+                << endl;
             break;
         }
         if (zone->is_blocked (*it))
@@ -26,8 +27,24 @@ void WalkInvocation::execute () {
     }
 }
 
+char const* WalkInvocation::message () {
+    Object* obj = Object::get_object_by_id (obj_id);
+    if (path->empty ()) {
+        char* retval = new char[strlen (obj->get_name ()) + 19 + 1];
+        sprintf (retval, "%s is moving nowhere.", obj->get_name ());
+        return (retval);
+    }
+    else {
+        char* retval = new char[strlen (obj->get_name ()) + 18 + 1];
+        sprintf (retval, "%s is moving to (%2i,%2i).", obj->get_name (),
+                (path->front ()).x, (path->front ()).y);
+        return (retval);
+    }
+}
+
 // StepInvocation methods
-StepInvocation::StepInvocation (ObjId new_obj_id, Zone* new_zone, int new_direction) {
+StepInvocation::StepInvocation (ObjId new_obj_id, Zone* new_zone,
+        int new_direction) {
     obj_id = new_obj_id;
     zone = new_zone;
     direction = new_direction;
@@ -80,6 +97,44 @@ void StepInvocation::execute () {
     zone->move_object (obj_id, new_loc);
 }
 
+char const* StepInvocation::message() {
+    char const* dir = new char[8];
+    switch (direction) {
+        case 1:
+            dir = "SW";
+            break;
+        case 2:
+            dir = "S";
+            break;
+        case 3:
+            dir = "SE";
+            break;
+        case 4:
+            dir = "W";
+            break;
+        case 5:
+            dir = "nowhere";
+            break;
+        case 6:
+            dir = "E";
+            break;
+        case 7:
+            dir = "NW";
+            break;
+        case 8:
+            dir = "N";
+            break;
+        case 9:
+            dir = "NE";
+            break;
+    }
+    Object* obj = Object::get_object_by_id (obj_id);
+    char* retval = new char
+        [strlen (obj->get_name ()) + 11 + strlen (dir) + 1 + 1];
+    sprintf (retval, "%s is moving %s.", obj->get_name (), dir);
+    return (retval);
+}
+
 // NullInvocation methods
 NullInvocation::NullInvocation (ObjId new_obj_id, Zone* new_zone) {
     obj_id = new_obj_id;
@@ -89,6 +144,10 @@ NullInvocation::NullInvocation (ObjId new_obj_id, Zone* new_zone) {
 NullInvocation::~NullInvocation () {}
 
 void NullInvocation::execute () {}
+
+char const* NullInvocation::message () {
+    return ("nothing");
+}
 
 // AttackInvocation methods
 AttackInvocation::AttackInvocation (ObjId new_obj_id, Zone* new_zone,
@@ -121,4 +180,14 @@ void AttackInvocation::execute () {
         target->set_blocks (false);
         zone->refresh_object (target->get_id ());
     }
+}
+
+char const* AttackInvocation::message () {
+    Object* obj = Object::get_object_by_id (obj_id);
+    Object* target_obj = Object::get_object_by_id (target_obj_id);
+    char* retval = new char[strlen (obj->get_name ()) + 15
+        + strlen (target_obj->get_name ()) + 1];
+    sprintf (retval, "%s is attacking %s.", obj->get_name (),
+            target_obj->get_name ());
+    return (retval);
 }
