@@ -123,7 +123,7 @@ AbilityInvocation* AI::take_turn () {
             it != visible->end(); it++) {
         Lifeform* o = (Lifeform*) Object::get_object_by_id ((*it).first);
         Coord o_loc = (*it).second;
-        if (strcmp (o->get_name (), "player") == 0) {
+        if ((o->get_name ()).compare ("player") == 0) {
             player_spotted = true;
             in_pursuit = true;
             last_seen = o_loc;

@@ -36,7 +36,7 @@ class Object {
     protected:
         ObjId id;
         char c;
-        char* name;
+        string name;
         TCODColor color;
         bool blocks;
 
@@ -61,7 +61,7 @@ class Object {
 
         char get_char ();
 
-        char* get_name ();
+        const string& get_name ();
 
         TCODColor get_color ();
 
@@ -84,7 +84,7 @@ class Lifeform : public Object {
         } equipment;
 
     public:
-        Lifeform (char new_c, const char* new_name, TCODColor new_color,
+        Lifeform (char new_c, const string& new_name, TCODColor new_color,
                 bool new_blocks, int new_max_hp);
 
         ~Lifeform ();
@@ -115,7 +115,7 @@ class Weapon : public Object {
         int swing_range;
 
     public:
-        Weapon (char new_c, const char* new_name, TCODColor new_color,
+        Weapon (char new_c, const string& new_name, TCODColor new_color,
                 bool new_blocks, bool new_swingable, int new_swing_damage,
                 int new_swing_range);
 

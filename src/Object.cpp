@@ -84,10 +84,8 @@ char Object::get_char () {
     return (c);
 }
 
-char* Object::get_name () {
-    char* temp = new char[strlen (name)];
-    strcpy (temp, name);
-    return (temp);
+const string& Object::get_name () {
+    return (name);
 }
 
 TCODColor Object::get_color () {
@@ -110,12 +108,11 @@ void Object::set_blocks (bool new_blocks) {
     blocks = new_blocks;
 }
 
-Lifeform::Lifeform (char new_c, const char* new_name, TCODColor new_color,
+Lifeform::Lifeform (char new_c, const string& new_name, TCODColor new_color,
         bool new_blocks, int new_max_hp) {
     id = get_next_id ();
     c = new_c;
-    name = new char[strlen (new_name)];
-    strcpy (name, new_name);
+    name = new_name;
     color = new_color;
     blocks = new_blocks;
 
@@ -127,7 +124,6 @@ Lifeform::Lifeform (char new_c, const char* new_name, TCODColor new_color,
 
 Lifeform::~Lifeform () {
     recycle_id ();
-    delete (name);
 }
 
 ObjType Lifeform::type () {
@@ -166,13 +162,12 @@ void Lifeform::equip_right_hand (ObjId obj_id) {
     equipment.right_hand = obj_id;
 }
 
-Weapon::Weapon (char new_c, const char* new_name, TCODColor new_color,
+Weapon::Weapon (char new_c, const string& new_name, TCODColor new_color,
         bool new_blocks, bool new_swingable, int new_swing_damage,
         int new_swing_range) {
     id = get_next_id ();
     c = new_c;
-    name = new char[strlen (new_name)];
-    strcpy (name, new_name);
+    name = new_name;
     color = new_color;
     blocks = new_blocks;
 
@@ -183,7 +178,6 @@ Weapon::Weapon (char new_c, const char* new_name, TCODColor new_color,
 
 Weapon::~Weapon () {
     recycle_id ();
-    delete (name);
 }
 
 ObjType Weapon::type () {

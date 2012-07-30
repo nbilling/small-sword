@@ -122,11 +122,10 @@ void TacticalUI::render_hud_messages () {
     for (int x=0; x < HUD_MESSAGES_W; x++)
         for (int y=0; y < HUD_MESSAGES_H; y++)
             hud_messages_console->putChar (x, y, ' ', TCOD_BKGND_NONE);
-    list<char*>* lines = messages_terminal->get_lines (HUD_MESSAGES_H);
-    list<char*>::reverse_iterator it = lines->rbegin ();
+    list<string>* lines = messages_terminal->get_lines (HUD_MESSAGES_H);
+    list<string>::reverse_iterator it = lines->rbegin ();
     for (int i = HUD_MESSAGES_H - 1; i >= 0 && it != lines->rend (); i--) {
-        char* temp = new char[2 + strlen (*it) + 2 + 1];
-        sprintf (temp, "%%c%s%%c", *it);
+        const char* temp = ("%c" + *it + "%c").c_str ();
         hud_messages_console->printEx (0, i, TCOD_BKGND_NONE, TCOD_LEFT, temp,
                 TCOD_COLCTRL_2, TCOD_COLCTRL_STOP);
         it++;
@@ -151,10 +150,8 @@ void TacticalUI::render_hud_target () {
             TCOD_COLCTRL_STOP);
     if (target_id) {
         Object* target = Object::get_object_by_id (target_id);
-        char* target_name = target->get_name ();
-        char target_desc[5 + strlen (target_name)];
-        sprintf (target_desc, "%%c%s%%c", target_name);
-        delete (target_name);
+        string target_name = target->get_name ();
+        const char* target_desc = ("%c" + target_name + "%c").c_str ();
         hud_target_console->printEx (HUD_TARGET_DESC_X, HUD_TARGET_DESC_Y,
                 TCOD_BKGND_NONE, TCOD_LEFT, target_desc, TCOD_COLCTRL_2,
                 TCOD_COLCTRL_STOP);
@@ -162,12 +159,11 @@ void TacticalUI::render_hud_target () {
             ObjId target_R_object_id =
                 ((Lifeform*) target)->get_equipped_right_hand ();
             if (target_R_object_id) {
-                char* target_R_object_name =
+                string target_R_object_name =
                     (Object::get_object_by_id
                      (target_R_object_id))->get_name ();
-                char target_R[8 + strlen (target_R_object_name)];
-                sprintf (target_R, "%%c%s%%c", target_R_object_name);
-                delete (target_R_object_name);
+                const char* target_R =
+                    ("%c" + target_R_object_name + "%c").c_str ();
                 hud_target_console->printEx (HUD_TARGET_R_X, HUD_TARGET_R_Y,
                         TCOD_BKGND_NONE, TCOD_LEFT, target_R, TCOD_COLCTRL_2,
                         TCOD_COLCTRL_STOP);
@@ -193,10 +189,9 @@ void TacticalUI::render_hud_status () {
             TCOD_COLCTRL_STOP);
     ObjId R_object_id = player->get_equipped_right_hand ();
     if (R_object_id) {
-        char* R_object_name =
+        string R_object_name =
             (Object::get_object_by_id (R_object_id))->get_name ();
-        char r[8 + strlen (R_object_name)];
-        sprintf(r, "%%cR: %s%%c", R_object_name);
+        const char* r = ("%cR: " + R_object_name + "%c").c_str ();
         hud_status_console->printEx (HUD_STATUS_R_X, HUD_STATUS_R_Y,
                 TCOD_BKGND_NONE, TCOD_LEFT, r, TCOD_COLCTRL_2,
                 TCOD_COLCTRL_STOP);

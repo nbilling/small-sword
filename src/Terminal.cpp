@@ -1,8 +1,8 @@
 #include "Terminal.hpp"
 
 Terminal::Terminal (int new_width) {
-    before = new list<char*> ();
-    after = new list<char*> ();
+    before = new list<string> ();
+    after = new list<string> ();
     width = new_width;
 }
 
@@ -13,7 +13,7 @@ Terminal::~Terminal () {
 
 void Terminal::scroll_up () {
     if (before->size () > 1) {
-        char* old_cursor = before->front ();
+        string old_cursor = before->front ();
         before->pop_front ();
         after->push_back (old_cursor);
     }
@@ -21,7 +21,7 @@ void Terminal::scroll_up () {
 
 void Terminal::scroll_down () {
     if (after->size () > 0) {
-        char* new_cursor = after->back ();
+        string new_cursor = after->back ();
         after->pop_back ();
         before->push_front (new_cursor);
     }
@@ -35,34 +35,40 @@ void Terminal::scroll_bottom () {
     while (after->size () > 0) scroll_down ();
 }
 
-void Terminal::append (const char* s) {
-    // For each `\n' delimited substring in s, break it down again into
-    // strings of, at most, length `width'. Then append these strings one at a
-    // time to the terminal.
-    char* s_copy = new char[strlen (s) + 1];
-    strcpy (s_copy, s);
-    for (char* t = strtok (s_copy, "\n"); t; t = strtok (NULL, "\n")) {
-        int len = strlen (t);
-        for (int i = 0; len / width > i; i++) {
-            char* l = new char[width + 1];
-            after->push_back (l);
-            scroll_down ();
-            memcpy (l, t + (i * width), width);
-            l[width] = '\0';
+// Returns the length of the susbtring starting at index 0 and ending at the
+// first Soft End Of Line. Note this treats '\n' as a regular whitespace char
+// and treats '-' as a whitespace char.
+int soft_wrap_length (int n, string s) {
+    if ((int) s.length () <= n)
+        return (s.length ());
+    else {
+        int length = n;
+        int i = 1;
+        for (string::iterator it = s.begin ();
+                it != s.end () && i <= n; it++) {
+            if (*it == ' ' || *it == '\n' || *it == '\t' || *it == '-') {
+                length = i;
+            }
+            i++;
         }
-        if (len % width != 0) {
-            char* l = new char[width + 1];
-            after->push_back (l);
-            scroll_down ();
-            memcpy (l, t + (len - (len % width)), len % width);
-            l[len % width] = '\0';
-        }
+        return length;
     }
 }
 
-list<char*>* Terminal::get_lines (int n) {
-    list<char*>* retval = new list<char*> ();
-    list<char*>::iterator it = before->begin ();
+void Terminal::append (const string s) {
+    string rest = s;
+    while (1) {
+        int l = soft_wrap_length (width, rest);
+        after->push_back (rest.substr (0, l));
+        scroll_down ();
+        if (l < (int) rest.length ()) rest = rest.substr (l, string::npos);
+        else break;
+    }
+}
+
+list<string>* Terminal::get_lines (int n) {
+    list<string>* retval = new list<string> ();
+    list<string>::iterator it = before->begin ();
     for (int i = 0; i < n && it != before->end (); i++) {
         retval->push_front (*it);
         it++;

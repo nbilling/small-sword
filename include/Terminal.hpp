@@ -2,15 +2,15 @@
 #define TERMINAL_HPP
 
 #include <list>
-#include "string.h"
-
+#include <string>
+#include "Formulas.hpp"
 using namespace std;
 
 class Terminal {
     private:
         // Note: the `cursor' position is the head of before.
-        list<char*>* before;
-        list<char*>* after;
+        list<string>* before;
+        list<string>* after;
         int width;
 
     public:
@@ -26,9 +26,9 @@ class Terminal {
 
         void scroll_bottom ();
 
-        void append (const char* s);
+        void append (const string s);
 
-        list<char*>* get_lines (int n);
+        list<string>* get_lines (int n);
 };
 
 #endif

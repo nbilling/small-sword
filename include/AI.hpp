@@ -27,8 +27,7 @@ class AI {
         TCODMap* fov_map;
 
         Object* object;
-        // This is just used as a global variable in take_turn, it is not kept up-to-date
-        // in between take_turn invocations. Cleanup?
+        // FIXME: This is just used as a global variable in take_turn, it is not kept up-to-date in between take_turn invocations. Cleanup?
         Coord object_loc;
 
         bool in_pursuit;

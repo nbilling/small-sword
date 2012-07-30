@@ -1,5 +1,6 @@
 #include "Abilities.hpp"
 #include "iostream"
+#include "sstream"
 
 // WalkInvocation methods
 WalkInvocation::WalkInvocation (ObjId new_obj_id, Zone* new_zone,
@@ -27,18 +28,16 @@ void WalkInvocation::execute () {
     }
 }
 
-char const* WalkInvocation::message () {
+const string WalkInvocation::message () {
     Object* obj = Object::get_object_by_id (obj_id);
     if (path->empty ()) {
-        char* retval = new char[strlen (obj->get_name ()) + 19 + 1];
-        sprintf (retval, "%s is moving nowhere.", obj->get_name ());
-        return (retval);
+        return (obj->get_name () + " is moving nowhere.");
     }
     else {
-        char* retval = new char[strlen (obj->get_name ()) + 18 + 1];
-        sprintf (retval, "%s is moving to (%2i,%2i).", obj->get_name (),
-                (path->front ()).x, (path->front ()).y);
-        return (retval);
+        ostringstream ss;
+        ss << obj->get_name () << " is moving to (" << (path->front ()).x << ","
+            << (path->front ()).y << ").";
+        return (ss.str ());
     }
 }
 
@@ -97,8 +96,8 @@ void StepInvocation::execute () {
     zone->move_object (obj_id, new_loc);
 }
 
-char const* StepInvocation::message() {
-    char const* dir = new char[8];
+const string StepInvocation::message() {
+    string dir;
     switch (direction) {
         case 1:
             dir = "SW";
@@ -129,10 +128,9 @@ char const* StepInvocation::message() {
             break;
     }
     Object* obj = Object::get_object_by_id (obj_id);
-    char* retval = new char
-        [strlen (obj->get_name ()) + 11 + strlen (dir) + 1 + 1];
-    sprintf (retval, "%s is moving %s.", obj->get_name (), dir);
-    return (retval);
+    ostringstream ss;
+    ss << obj->get_name () << " is moving " << dir << ".";
+    return (ss.str ());
 }
 
 // NullInvocation methods
@@ -145,7 +143,7 @@ NullInvocation::~NullInvocation () {}
 
 void NullInvocation::execute () {}
 
-char const* NullInvocation::message () {
+const string NullInvocation::message () {
     return ("nothing");
 }
 
@@ -182,12 +180,9 @@ void AttackInvocation::execute () {
     }
 }
 
-char const* AttackInvocation::message () {
+const string AttackInvocation::message () {
     Object* obj = Object::get_object_by_id (obj_id);
     Object* target_obj = Object::get_object_by_id (target_obj_id);
-    char* retval = new char[strlen (obj->get_name ()) + 15
-        + strlen (target_obj->get_name ()) + 1];
-    sprintf (retval, "%s is attacking %s.", obj->get_name (),
-            target_obj->get_name ());
-    return (retval);
+    return (obj->get_name () + " is attacking " + target_obj->get_name () +
+            ".");
 }
