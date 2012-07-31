@@ -488,7 +488,6 @@ int TacticalUI::display () {
             break;
         }
         player_action->execute ();
-        cout << player_action->message ();
         messages_terminal->append (player_action->message ());
         delete (player_action);
 
