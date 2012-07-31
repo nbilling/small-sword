@@ -58,6 +58,9 @@ all : release
 
 release : small-sword
 
+play: small-sword
+	./small-sword
+
 E%.cpp :
 	$(CPP) src/$*.cpp $(CFLAGS) $(TCOD_LIBS) $(ZLIB_LIBS) $(PNG_LIBS) $(SDL_LIBS) -E > preprocessed_$*.cpp
 
