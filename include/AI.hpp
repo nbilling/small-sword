@@ -15,6 +15,8 @@ class AI;
 #include "Pathfinding.hpp"
 #include "Types.hpp"
 
+using namespace std;
+
 #define FOV_ALGO 0
 #define FOV_LIGHT_WALLS true
 #define TORCH_RADIUS 10

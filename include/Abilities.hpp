@@ -15,6 +15,8 @@ class AttackInvocation;
 #include "Object.hpp"
 #include "Types.hpp"
 
+using namespace std;
+
 class AbilityInvocation {
     protected:
         ObjId obj_id;
