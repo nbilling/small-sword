@@ -64,12 +64,10 @@ void Terminal::append (const string s) {
     string rest = s;
     while (rest.compare ("") != 0) {
         int l = soft_wrap_length (width, rest);
-        cout << l << endl;
         after->push_back (substring (rest, 0, l));
         scroll_down ();
         rest = substring (rest, l, string::npos);
     }
-    cout << "append return" << endl;
 }
 
 list<string>* Terminal::get_lines (int n) {
