@@ -55,15 +55,21 @@ int soft_wrap_length (int n, string s) {
     }
 }
 
+string substring (const string s, int a, int b) {
+    if (a < (int) s.length ()) return (s.substr (a, b));
+    else return ("");
+}
+
 void Terminal::append (const string s) {
     string rest = s;
-    while (1) {
+    while (rest.compare ("") != 0) {
         int l = soft_wrap_length (width, rest);
-        after->push_back (rest.substr (0, l));
+        cout << l << endl;
+        after->push_back (substring (rest, 0, l));
         scroll_down ();
-        if (l < (int) rest.length ()) rest = rest.substr (l, string::npos);
-        else break;
+        rest = substring (rest, l, string::npos);
     }
+    cout << "append return" << endl;
 }
 
 list<string>* Terminal::get_lines (int n) {
