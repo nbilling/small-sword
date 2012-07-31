@@ -1,16 +1,21 @@
 #ifndef TACTICALUI_HPP
 #define TACTICALUI_HPP
 
+class TacticalUI;
+
+#include "iostream"
 #include "list"
 #include "string"
-#include "iostream"
+
 #include "libtcod.hpp"
-#include "Types.hpp"
-#include "DungeonGenerator.hpp"
-#include "Zone.hpp"
-#include "Object.hpp"
+
 #include "AI.hpp"
+#include "DungeonGenerator.hpp"
+#include "Object.hpp"
+#include "Types.hpp"
 #include "Terminal.hpp"
+#include "Zone.hpp"
+
 using namespace std;
 
 // Map dimensions

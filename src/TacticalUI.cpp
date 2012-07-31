@@ -1,6 +1,5 @@
 #include "TacticalUI.hpp"
 
-
 TacticalUI::TacticalUI (Zone* new_zone, list<AI*>* new_ais,
         Lifeform* new_player) {
     zone = new_zone;

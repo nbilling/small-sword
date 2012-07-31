@@ -1,6 +1,4 @@
 #include "Abilities.hpp"
-#include "iostream"
-#include "sstream"
 
 // WalkInvocation methods
 WalkInvocation::WalkInvocation (ObjId new_obj_id, Zone* new_zone,

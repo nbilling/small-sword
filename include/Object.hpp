@@ -1,12 +1,18 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include "cstring"
-#include "cstdlib"
-#include "list"
+class ObjId;
+class Object;
+class Lifeform;
+class Weapon;
+
 #include "assert.h"
+#include "cstdlib"
 #include "iostream"
+#include "list"
+
 #include "libtcod.hpp"
+
 #include "Types.hpp"
 #include "Zone.hpp"
 

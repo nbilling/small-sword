@@ -2,10 +2,14 @@
 #define DUNGEONGENERATOR_HPP
 
 #include "list"
+
 #include "libtcod.hpp"
-#include "Types.hpp"
-#include "Rect.hpp"
+
 #include "AI.hpp"
+#include "Rect.hpp"
+#include "Types.hpp"
+
+using namespace std;
 
 //Definitions
 #define MAXINT(a,b) (a > b ? a : b)

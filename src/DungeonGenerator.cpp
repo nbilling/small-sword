@@ -1,7 +1,5 @@
 #include "DungeonGenerator.hpp"
 
-using namespace std;
-
 inline
 void create_room (Zone* zone, const Rect* room) {
     //go through the tiles in the rectangle and make them passable

@@ -1,10 +1,19 @@
 #ifndef ABILITIES_HPP
 #define ABILITIES_HPP
 
+class AbilityInvocation;
+class WalkInvocation;
+class StepInvocation;
+class NullInvocation;
+class AttackInvocation;
+
 #include <assert.h>
-#include "Types.hpp"
+#include "iostream"
+#include "sstream"
+
 #include "Formulas.hpp"
 #include "Object.hpp"
+#include "Types.hpp"
 
 class AbilityInvocation {
     protected:

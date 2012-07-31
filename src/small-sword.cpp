@@ -1,12 +1,15 @@
 #include "iostream"
 #include "list"
+
 #include "libtcod.hpp"
-#include "Types.hpp"
-#include "Object.hpp"
+
 #include "AI.hpp"
+#include "DungeonGenerator.hpp"
+#include "Object.hpp"
+#include "Types.hpp"
 #include "TacticalUI.hpp"
 #include "Zone.hpp"
-#include "DungeonGenerator.hpp"
+
 using namespace std;
 
 //Definitions

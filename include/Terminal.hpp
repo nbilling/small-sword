@@ -1,9 +1,13 @@
 #ifndef TERMINAL_HPP
 #define TERMINAL_HPP
 
+class Terminal;
+
 #include <list>
 #include <string>
+
 #include "Formulas.hpp"
+
 using namespace std;
 
 class Terminal {

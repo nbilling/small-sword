@@ -1,8 +1,5 @@
 #include "Formulas.hpp"
 
-#define min(x, y) (x > y)?y:x
-#define max(x, y) (x > y)?x:y
-
 int distance_to (const Coord& src, const Coord& dest) {
     float dx = (float) dest.x - src.x;
     float dy = (float) dest.y - src.y;

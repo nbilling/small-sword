@@ -1,15 +1,19 @@
 #ifndef AI_HPP
 #define AI_HPP
 
-#include "list"
+class AI;
+
 #include "assert.h"
+#include "iostream"
+#include "list"
+
 #include "libtcod.hpp"
-#include "Types.hpp"
-#include "Formulas.hpp"
+
 #include "Abilities.hpp"
+#include "Formulas.hpp"
 #include "Object.hpp"
 #include "Pathfinding.hpp"
-
+#include "Types.hpp"
 
 #define FOV_ALGO 0
 #define FOV_LIGHT_WALLS true

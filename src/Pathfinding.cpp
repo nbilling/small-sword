@@ -1,9 +1,4 @@
 #include "Pathfinding.hpp"
-#include "iostream"
-
-#define INF INT_MAX
-
-using namespace std;
 
 class Node {
     public:

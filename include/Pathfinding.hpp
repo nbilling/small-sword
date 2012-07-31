@@ -1,13 +1,18 @@
 #ifndef PATHFINDING_HPP
 #define PATHFINDING_HPP
 
+#include "climits"
+#include "iostream"
 #include "list"
+
+#include "Formulas.hpp"
+#include "MinHeap.hpp"
 #include "Types.hpp"
 #include "Zone.hpp"
-#include "MinHeap.hpp"
-#include "Formulas.hpp"
-#include "iostream"
-#include "climits"
+
+#define INF INT_MAX
+
+using namespace std;
 
 typedef struct {
     int** d;

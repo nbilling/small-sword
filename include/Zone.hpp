@@ -1,18 +1,22 @@
 #ifndef ZONE_HPP
 #define ZONE_HPP
 
+class Zone;
+
 #include "cmath"
 #include "list"
 #include "map"
+
+#include "Object.hpp"
 #include "Types.hpp"
 #include "Tile.hpp"
-#include "Object.hpp"
+
 using namespace std;
 
 #define color_wall TCODColor::grey
 #define color_ground TCODColor::desaturatedOrange
 
-class Zone{
+class Zone {
     private:
         // Inhabitants
         map<ObjId,Coord>* object_locations;

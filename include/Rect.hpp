@@ -1,6 +1,8 @@
 #ifndef RECT_HPP
 #define RECT_HPP
 
+class Rect;
+
 class Rect{
     public:
         int x1;

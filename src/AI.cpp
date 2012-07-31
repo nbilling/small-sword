@@ -1,5 +1,4 @@
 #include "AI.hpp"
-#include "iostream"
 
 AI::AI (Object* new_object, Zone* new_zone) {
     object = new_object;
